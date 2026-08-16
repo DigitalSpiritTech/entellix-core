@@ -1,0 +1,28 @@
+# macOS
+.DS_Store
+
+# Dependencies
+node_modules/
+
+# Build, test, and task-runner output
+dist/
+build/
+coverage/
+artifacts/
+.turbo/
+*.tsbuildinfo
+*.log
+
+# Local environment and generated secrets
+.env
+.env.*
+!.env.example
+**/signing_keys.json
+
+# Local tool state
+.claude/settings.local.json
+.mastra/
+
+# Scratch notes
+.research-notes/
+CLAUDE.local.md

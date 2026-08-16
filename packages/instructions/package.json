@@ -1,0 +1,62 @@
+{
+  "name": "@entellix/instructions",
+  "version": "0.0.0",
+  "description": "Versioned MCP guidance and client instruction templates for Entellix.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DigitalSpiritTech/entellix-core.git",
+    "directory": "packages/instructions"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "docs"
+  ],
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./mcp": "./src/mcp.ts",
+    "./schema": "./src/schema.ts",
+    "./templates": "./src/templates.ts"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js"
+      },
+      "./mcp": {
+        "types": "./dist/mcp.d.ts",
+        "import": "./dist/mcp.js"
+      },
+      "./schema": {
+        "types": "./dist/schema.d.ts",
+        "import": "./dist/schema.js"
+      },
+      "./templates": {
+        "types": "./dist/templates.d.ts",
+        "import": "./dist/templates.js"
+      }
+    },
+    "access": "public"
+  },
+  "scripts": {
+    "build": "node ../../scripts/clean-package-dist.mjs && tsc -p tsconfig.release.json",
+    "test": "pnpm run test:unit",
+    "test:integration": "node -e \"console.log('No integration tests for @entellix/instructions.')\"",
+    "test:unit": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

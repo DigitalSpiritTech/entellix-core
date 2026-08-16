@@ -1,0 +1,58 @@
+name: Public release
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: public-release-main
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  id-token: write
+  pull-requests: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify package artifacts
+        run: pnpm release:packages:verify
+
+      - name: Audit production dependencies
+        run: pnpm release:security
+
+      - name: Scan tracked files for secrets
+        run: pnpm release:secrets
+
+      - name: Enforce legal release gate
+        run: pnpm release:preflight
+
+      - name: Create release PR or publish
+        uses: changesets/action@v1
+        with:
+          publish: pnpm release:publish
+          version: pnpm release:version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

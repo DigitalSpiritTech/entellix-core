@@ -1,0 +1,128 @@
+{
+  "name": "@entellix/core",
+  "version": "0.0.0",
+  "description": "Provider- and persistence-neutral Entellix memory engine.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DigitalSpiritTech/entellix-core.git",
+    "directory": "packages/core"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./classifier": "./src/classifier.ts",
+    "./conflicts": "./src/conflicts.ts",
+    "./directive-precedence": "./src/directive-precedence.ts",
+    "./directives": "./src/directives.ts",
+    "./extractor": "./src/extractor.ts",
+    "./model-output": "./src/model-output.ts",
+    "./packet": "./src/packet/index.ts",
+    "./ports": "./src/ports.ts",
+    "./policy-matrix": "./src/policy-matrix.ts",
+    "./reconciler": "./src/reconciler.ts",
+    "./retrieval": "./src/retrieval/index.ts",
+    "./retrieval/config": "./src/retrieval/config.ts",
+    "./retrieval/eval-exclusion": "./src/retrieval/eval-exclusion.ts",
+    "./retrieval/fusion": "./src/retrieval/fusion.ts",
+    "./retrieval/metrics": "./src/retrieval/metrics.ts",
+    "./salience": "./src/salience.ts"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js"
+      },
+      "./classifier": {
+        "types": "./dist/classifier.d.ts",
+        "import": "./dist/classifier.js"
+      },
+      "./conflicts": {
+        "types": "./dist/conflicts.d.ts",
+        "import": "./dist/conflicts.js"
+      },
+      "./directive-precedence": {
+        "types": "./dist/directive-precedence.d.ts",
+        "import": "./dist/directive-precedence.js"
+      },
+      "./directives": {
+        "types": "./dist/directives.d.ts",
+        "import": "./dist/directives.js"
+      },
+      "./extractor": {
+        "types": "./dist/extractor.d.ts",
+        "import": "./dist/extractor.js"
+      },
+      "./model-output": {
+        "types": "./dist/model-output.d.ts",
+        "import": "./dist/model-output.js"
+      },
+      "./packet": {
+        "types": "./dist/packet/index.d.ts",
+        "import": "./dist/packet/index.js"
+      },
+      "./ports": {
+        "types": "./dist/ports.d.ts",
+        "import": "./dist/ports.js"
+      },
+      "./policy-matrix": {
+        "types": "./dist/policy-matrix.d.ts",
+        "import": "./dist/policy-matrix.js"
+      },
+      "./reconciler": {
+        "types": "./dist/reconciler.d.ts",
+        "import": "./dist/reconciler.js"
+      },
+      "./retrieval": {
+        "types": "./dist/retrieval/index.d.ts",
+        "import": "./dist/retrieval/index.js"
+      },
+      "./retrieval/config": {
+        "types": "./dist/retrieval/config.d.ts",
+        "import": "./dist/retrieval/config.js"
+      },
+      "./retrieval/eval-exclusion": {
+        "types": "./dist/retrieval/eval-exclusion.d.ts",
+        "import": "./dist/retrieval/eval-exclusion.js"
+      },
+      "./retrieval/fusion": {
+        "types": "./dist/retrieval/fusion.d.ts",
+        "import": "./dist/retrieval/fusion.js"
+      },
+      "./retrieval/metrics": {
+        "types": "./dist/retrieval/metrics.d.ts",
+        "import": "./dist/retrieval/metrics.js"
+      },
+      "./salience": {
+        "types": "./dist/salience.d.ts",
+        "import": "./dist/salience.js"
+      }
+    },
+    "access": "public"
+  },
+  "scripts": {
+    "build": "node ../../scripts/clean-package-dist.mjs && tsc -p tsconfig.release.json",
+    "test": "pnpm run test:unit",
+    "test:integration": "node -e \"console.log('No integration tests for @entellix/core.')\"",
+    "test:unit": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@entellix/contracts": "workspace:*",
+    "effect": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}
