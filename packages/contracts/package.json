@@ -1,6 +1,6 @@
 {
   "name": "@entellix/contracts",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Zod contracts shared by Entellix memory-engine hosts.",
   "license": "Apache-2.0",
   "repository": {
