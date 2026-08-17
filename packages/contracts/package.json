@@ -1,0 +1,111 @@
+{
+  "name": "@entellix/contracts",
+  "version": "0.0.0",
+  "description": "Zod contracts shared by Entellix memory-engine hosts.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DigitalSpiritTech/entellix-core.git",
+    "directory": "packages/contracts"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./candidates": "./src/candidates.ts",
+    "./classification": "./src/classification.ts",
+    "./conflicts": "./src/conflicts.ts",
+    "./core-ports": "./src/core-ports.ts",
+    "./data-rights": "./src/data-rights.ts",
+    "./directive-precedence": "./src/directive-precedence.ts",
+    "./directives": "./src/directives.ts",
+    "./packet": "./src/packet.ts",
+    "./reviews": "./src/reviews.ts",
+    "./pipeline": "./src/pipeline.ts",
+    "./policy-matrix": "./src/policy-matrix.ts",
+    "./reconciler": "./src/reconciler.ts",
+    "./retrieval": "./src/retrieval.ts"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js"
+      },
+      "./candidates": {
+        "types": "./dist/candidates.d.ts",
+        "import": "./dist/candidates.js"
+      },
+      "./classification": {
+        "types": "./dist/classification.d.ts",
+        "import": "./dist/classification.js"
+      },
+      "./conflicts": {
+        "types": "./dist/conflicts.d.ts",
+        "import": "./dist/conflicts.js"
+      },
+      "./core-ports": {
+        "types": "./dist/core-ports.d.ts",
+        "import": "./dist/core-ports.js"
+      },
+      "./data-rights": {
+        "types": "./dist/data-rights.d.ts",
+        "import": "./dist/data-rights.js"
+      },
+      "./directive-precedence": {
+        "types": "./dist/directive-precedence.d.ts",
+        "import": "./dist/directive-precedence.js"
+      },
+      "./directives": {
+        "types": "./dist/directives.d.ts",
+        "import": "./dist/directives.js"
+      },
+      "./packet": {
+        "types": "./dist/packet.d.ts",
+        "import": "./dist/packet.js"
+      },
+      "./pipeline": {
+        "types": "./dist/pipeline.d.ts",
+        "import": "./dist/pipeline.js"
+      },
+      "./policy-matrix": {
+        "types": "./dist/policy-matrix.d.ts",
+        "import": "./dist/policy-matrix.js"
+      },
+      "./reconciler": {
+        "types": "./dist/reconciler.d.ts",
+        "import": "./dist/reconciler.js"
+      },
+      "./retrieval": {
+        "types": "./dist/retrieval.d.ts",
+        "import": "./dist/retrieval.js"
+      },
+      "./reviews": {
+        "types": "./dist/reviews.d.ts",
+        "import": "./dist/reviews.js"
+      }
+    },
+    "access": "public"
+  },
+  "scripts": {
+    "build": "node ../../scripts/clean-package-dist.mjs && tsc -p tsconfig.release.json",
+    "test": "pnpm run test:unit",
+    "test:integration": "node -e \"console.log('No integration tests for @entellix/contracts.')\"",
+    "test:unit": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "ui": "stream",
+  "globalDependencies": ["tsconfig.base.json"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", "build/**", ".mastra/output/**"],
+      "env": ["ANTHROPIC_API_KEY", "ENTELLIX_*", "DATABASE_URL", "NODE_ENV"]
+    },
+    "typecheck": {},
+    "test:integration": {
+      "cache": false,
+      "env": ["ANTHROPIC_API_KEY", "ENTELLIX_*", "DATABASE_URL", "NODE_ENV"]
+    },
+    "test:unit": {
+      "env": ["ANTHROPIC_API_KEY", "ENTELLIX_*", "DATABASE_URL", "NODE_ENV"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}
