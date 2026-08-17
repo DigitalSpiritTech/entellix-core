@@ -83,13 +83,12 @@ describe("standalone review and data lifecycle", () => {
       workspaceId,
       new Date("2026-08-16T12:01:00.000Z"),
     );
-    expect(exported.events[0]?.rawEvent).toBe("I prefer concise status updates.");
+    const [exportedEvent] = exported.events;
+    expect(exportedEvent?.rawEvent).toBe("I prefer concise status updates.");
     expect(exported.memories).toHaveLength(1);
 
-    const retained = await repository.runRetention(
-      new Date("2026-08-17T00:00:00.000Z"),
-      new Date("2026-08-17T00:00:00.000Z"),
-    );
+    const retentionTime = new Date(new Date(exportedEvent!.createdAt).getTime() + 1);
+    const retained = await repository.runRetention(retentionTime, retentionTime);
     expect(retained.eventsRedacted).toBe(1);
 
     await expect(repository.deleteWorkspace()).resolves.toMatchObject({
