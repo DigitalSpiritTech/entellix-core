@@ -9,13 +9,44 @@ const standaloneRoot = join(repositoryRoot, "apps/standalone");
 const verifyOnly = process.argv.includes("--verify");
 
 const run = (command, args, cwd = repositoryRoot) =>
-  execFileSync(command, args, { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "inherit"] });
+  execFileSync(command, args, {
+    cwd,
+    encoding: "utf8",
+    maxBuffer: 16 * 1024 * 1024,
+    stdio: ["ignore", "pipe", "inherit"],
+  });
 
 const exists = async (path) =>
   stat(path).then(
     () => true,
     () => false,
   );
+
+export const buildStandaloneWorkspace = (runBuild, root) =>
+  runBuild("pnpm", ["run", "build"], root);
+
+const archiveRequirements = (distributionName) => ({
+  exact: [
+    `${distributionName}/server/index.mjs`,
+    `${distributionName}/migrations/0001_single_workspace.sql`,
+    `${distributionName}/scripts/migrate.mjs`,
+    `${distributionName}/THIRD_PARTY_LICENSES.json`,
+  ],
+  suffixes: [
+    "/node_modules/@entellix/contracts/dist/reconciler.js",
+    "/node_modules/@entellix/core/dist/reconciler.js",
+    "/node_modules/@entellix/instructions/dist/mcp.js",
+  ],
+});
+
+export const findMissingStandaloneArchiveRequirement = (entries, distributionName) => {
+  const requirements = archiveRequirements(distributionName);
+  return (
+    requirements.exact.find((required) => !entries.includes(required)) ??
+    requirements.suffixes.find((required) => !entries.some((entry) => entry.endsWith(required))) ??
+    null
+  );
+};
 
 const packageStandalone = async () => {
   const manifest = JSON.parse(await readFile(join(standaloneRoot, "package.json"), "utf8"));
@@ -26,7 +57,7 @@ const packageStandalone = async () => {
   const archive = join(outputDirectory, `${distributionName}.tgz`);
 
   try {
-    run("pnpm", ["run", "build"], standaloneRoot);
+    buildStandaloneWorkspace(run, repositoryRoot);
     await mkdir(distributionRoot, { recursive: true });
     await cp(join(standaloneRoot, ".mastra/output"), join(distributionRoot, "server"), {
       recursive: true,
@@ -77,14 +108,13 @@ const packageStandalone = async () => {
 
     await mkdir(dirname(archive), { recursive: true });
     run("tar", ["-czf", archive, "-C", temporaryRoot, distributionName]);
-    for (const required of [
-      `${distributionName}/server/index.mjs`,
-      `${distributionName}/migrations/0001_single_workspace.sql`,
-      `${distributionName}/scripts/migrate.mjs`,
-      `${distributionName}/THIRD_PARTY_LICENSES.json`,
-    ]) {
-      const entry = run("tar", ["-tzf", archive, required]).trim();
-      if (entry !== required) throw new Error(`standalone artifact is missing ${required}`);
+    const archiveEntries = run("tar", ["-tzf", archive]).trim().split("\n");
+    const missingRequirement = findMissingStandaloneArchiveRequirement(
+      archiveEntries,
+      distributionName,
+    );
+    if (missingRequirement) {
+      throw new Error(`standalone artifact is missing ${missingRequirement}`);
     }
     console.log(
       verifyOnly
@@ -96,4 +126,6 @@ const packageStandalone = async () => {
   }
 };
 
-await packageStandalone();
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  await packageStandalone();
+}
