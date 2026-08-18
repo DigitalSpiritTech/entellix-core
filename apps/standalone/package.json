@@ -1,6 +1,6 @@
 {
   "name": "@entellix/standalone",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Single-workspace self-hosted Entellix MCP server.",
   "license": "Apache-2.0",

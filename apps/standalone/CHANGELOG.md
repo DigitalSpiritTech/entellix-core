@@ -1,5 +1,17 @@
 # @entellix/standalone
 
+## 0.1.1
+
+### Patch Changes
+
+- 79058b9: Build, attest, upload, and verify the standalone archive directly from the
+  trusted public release workflow, with a manual tag-based path for repairing
+  missing release assets.
+- Updated dependencies [57d4340]
+  - @entellix/core@0.1.1
+  - @entellix/contracts@0.1.1
+  - @entellix/instructions@0.1.1
+
 ## 0.1.0
 
 ### Minor Changes
