@@ -31,4 +31,15 @@ describe("standalone config", () => {
       loadStandaloneConfig({ ...required, ENTELLIX_MASTRA_SCHEMA: "public; drop schema public" }),
     ).toThrow("Invalid");
   });
+
+  it("treats empty optional embedding values from .env.example as unset", () => {
+    const config = loadStandaloneConfig({
+      ...required,
+      ENTELLIX_EMBEDDING_URL: "",
+      ENTELLIX_EMBEDDING_API_KEY: "",
+    });
+
+    expect(config.ENTELLIX_EMBEDDING_URL).toBeUndefined();
+    expect(config.ENTELLIX_EMBEDDING_API_KEY).toBeUndefined();
+  });
 });

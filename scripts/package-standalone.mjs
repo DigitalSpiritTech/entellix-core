@@ -30,11 +30,17 @@ const packageStandalone = async () => {
     await mkdir(distributionRoot, { recursive: true });
     await cp(join(standaloneRoot, ".mastra/output"), join(distributionRoot, "server"), {
       recursive: true,
-      dereference: true,
+      dereference: false,
+      verbatimSymlinks: true,
     });
     await cp(join(standaloneRoot, "migrations"), join(distributionRoot, "migrations"), {
       recursive: true,
     });
+    await mkdir(join(distributionRoot, "scripts"), { recursive: true });
+    await cp(
+      join(standaloneRoot, "scripts/migrate-distribution.mjs"),
+      join(distributionRoot, "scripts/migrate.mjs"),
+    );
     await cp(join(standaloneRoot, ".env.example"), join(distributionRoot, ".env.example"));
     await cp(join(standaloneRoot, "README.md"), join(distributionRoot, "README.md"));
 
@@ -59,7 +65,10 @@ const packageStandalone = async () => {
           private: true,
           type: "module",
           engines: { node: ">=24" },
-          scripts: { start: "node --env-file=.env server/index.mjs" },
+          scripts: {
+            migrate: "node --env-file=.env scripts/migrate.mjs",
+            start: "node --env-file=.env server/index.mjs",
+          },
         },
         null,
         2,
@@ -71,6 +80,7 @@ const packageStandalone = async () => {
     for (const required of [
       `${distributionName}/server/index.mjs`,
       `${distributionName}/migrations/0001_single_workspace.sql`,
+      `${distributionName}/scripts/migrate.mjs`,
       `${distributionName}/THIRD_PARTY_LICENSES.json`,
     ]) {
       const entry = run("tar", ["-tzf", archive, required]).trim();

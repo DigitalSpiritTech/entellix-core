@@ -8,6 +8,11 @@ single-workspace self-hosted server.
 Each package can be consumed through its documented public exports, while the
 standalone server provides a complete single-workspace composition.
 
+Status: early public beta. The standalone host is a self-hosted reference
+distribution, not a turnkey managed service; review its prerequisites,
+limitations, and production guidance before exposing it outside a trusted
+development environment.
+
 ## Workspace
 
 - `packages/contracts` — runtime-validated Zod contracts and inferred types.

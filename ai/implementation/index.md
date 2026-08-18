@@ -13,10 +13,26 @@ pnpm install
 - `pnpm build` — builds all packages and the standalone host.
 - `pnpm release:packages:verify` — packs and imports all public npm packages as
   an external consumer.
+- `pnpm release:documentation:verify` — runs the examples embedded in the three
+  package READMEs from packed tarballs and checks their documented exports
+  against the publish manifests.
 - `pnpm release:standalone:verify` — assembles and inspects the standalone
   tarball in a temporary directory.
 - `pnpm check:all` — runs all of the above release gates, including dependency,
   secret, and license checks.
+
+The credential-free standalone clean-room gate needs an explicitly disposable
+PostgreSQL database whose name contains `smoke` or `test`:
+
+```sh
+ENTELLIX_SMOKE_DATABASE_URL=postgres://.../entellix_smoke \
+  pnpm release:standalone:smoke -- \
+  --archive artifacts/entellix-standalone-<version>.tgz
+```
+
+Add `--provider-round-trip` and supply `ANTHROPIC_API_KEY` for the pre-release
+save/process/list proof. Optional embedding variables exercise semantic
+retrieval during the same run. Never print or record provider credentials.
 
 ## Release flow
 

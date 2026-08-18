@@ -1,6 +1,6 @@
 # Entellix Core Public Beta Readiness
 
-Status: Active
+Status: Active — Phase 2 implemented; release validation pending
 Started: 2026-08-17
 Target: the next public Entellix Core release after `0.1.0`
 
@@ -12,25 +12,19 @@ artifacts and documentation.
 
 ## Current Baseline
 
-- `@entellix/contracts`, `@entellix/core`, and `@entellix/instructions` `0.1.0`
+- `@entellix/contracts`, `@entellix/core`, and `@entellix/instructions` `0.1.1`
   are public on npm.
 - Stable publication from `.github/workflows/release.yml` uses npm trusted
   publishing and produces SLSA provenance attestations.
 - The public repository is Apache-2.0 and has passing source, package, security,
   secret, and legal release gates.
-- The single-workspace standalone host builds and passes its repository release
-  verifier.
-- The `@entellix/standalone@0.1.0` GitHub release exists, but it has no
-  downloadable tarball. Its tag was created by a workflow using `GITHUB_TOKEN`,
-  so the separate tag-triggered workflow did not run.
+- The `@entellix/standalone@0.1.1` release topology builds, attests, uploads, and
+  verifies the versioned standalone archive in the trusted release workflow.
 - The standalone README and npm package READMEs describe ownership but do not
   yet provide adequate installation, configuration, usage, or verification
   guidance.
 - Some security and release documentation still describes the first public
   release as pending.
-- npm trusts `release.yml` for each package. A separate `canary.yml` cannot use
-  that same trusted-publisher identity, so stable and canary publication must
-  share the trusted workflow or the canary design must be retired.
 
 ## Implementation Constraints
 
@@ -44,6 +38,14 @@ artifacts and documentation.
 - Add a Changeset for user-visible package or standalone changes.
 
 ## Phase 1: Repair the Release Topology
+
+Status: Complete (2026-08-18)
+
+Phase 1 shipped in `@entellix/standalone@0.1.1`. Commit `79058b9` consolidated
+publication and standalone artifact production in `.github/workflows/release.yml`,
+removed the separate canary and tag-triggered workflows, added the manual
+tag-based repair path, and added a release-topology assertion. The `0.1.1`
+version commit records the corrected distribution path.
 
 1. Consolidate stable and optional canary publication under the trusted
    `release.yml` workflow, or explicitly retire canary publication until it has
@@ -70,32 +72,196 @@ artifacts and documentation.
 
 ## Phase 2: Make the Public Surface Usable
 
-1. Expand `apps/standalone/README.md` into an exact quickstart:
-   - supported Node, pnpm, and PostgreSQL versions;
-   - download-from-release and source-checkout paths;
-   - database creation, environment configuration, and migration;
-   - secure local-token generation;
-   - Anthropic generation setup and optional embedding setup;
-   - server start, health verification, MCP client configuration, and first
-     memory round trip;
-   - operator review, retention, export, and confirmed-deletion routes;
-   - current limitations and production-security guidance.
-2. Add installation and minimal functional usage examples to each public npm
-   package README.
-3. Document the supported package exports and distinguish stable public
-   contracts from implementation details.
-4. Add a clean-room documentation smoke test that follows only the published
-   instructions and released artifacts.
+Status: Implemented (2026-08-18); provider-backed release validation pending
+
+### Goal
+
+Make the standalone archive and all three npm packages usable by a developer
+who has only the public release artifacts and their included READMEs. Phase 2
+documents and verifies the existing public surface; it does not add a managed
+service, multi-workspace operation, or a new provider abstraction.
+
+### Implementation decisions
+
+1. Treat only package specifiers present in a published package's `exports` map
+   as supported public-beta entry points. `src`, `dist`, and undeclared deep
+   imports remain implementation details.
+2. Support and document two standalone paths: the GitHub release archive for
+   evaluators and a source checkout for contributors. Keep their commands
+   separate wherever installation, migration, or startup differs.
+3. Determine the PostgreSQL support floor by exercising the quickstart against
+   the oldest version selected for support and the current stable major; do not
+   publish an untested version claim.
+4. Split verification into a credential-free PR gate and a provider-backed
+   clean-room release gate. PR CI checks every documented import and command it
+   can run deterministically. The complete save/process/retrieve round trip runs
+   with real provider credentials before release and is recorded in the PR.
+
+### Workstream 1: Turn the acceptance criteria into executable checks
+
+1. Add `scripts/verify-public-documentation.mjs` and a root
+   `release:documentation:verify` command before expanding the READMEs.
+2. Mark executable README snippets with stable identifiers so the verifier runs
+   the exact published code rather than a duplicate fixture.
+3. Pack the three public packages, install them into a temporary consumer, and
+   execute each package quickstart against the packed artifacts.
+4. Compare every documented Entellix import specifier with the matching
+   `publishConfig.exports` entry. Fail on an undocumented internal deep import,
+   a documented entry point that is not exported, or an exported entry point
+   missing from the public-surface inventory.
+5. Add the credential-free documentation verifier to `pnpm check:all`; preserve
+   the current package, security, secret, legal, and topology gates.
+
+Deliverables:
+
+- `scripts/verify-public-documentation.mjs`
+- root `package.json` verification command
+- focused tests for snippet discovery, export-map comparison, and useful
+  failures
+
+### Workstream 2: Document the three npm packages
+
+For each of `packages/contracts/README.md`, `packages/core/README.md`, and
+`packages/instructions/README.md`:
+
+1. State the Node requirement, ESM expectation, and ordinary pnpm/npm install
+   commands.
+2. Add one minimal, executable example that demonstrates the package's primary
+   role:
+   - parse a public runtime input with `@entellix/contracts`;
+   - invoke a pure provider-neutral decision or composition function from
+     `@entellix/core` without requiring a database or model call;
+   - load the active MCP instructions or a client template from
+     `@entellix/instructions`.
+3. Inventory every supported root and subpath export from the package manifest,
+   grouped by purpose, with links to the relevant source or package docs.
+4. Add a public-beta compatibility note: documented exports are the supported
+   surface, implementation paths are private, and `0.x` consumers should review
+   changelogs before upgrading.
+
+Deliverables:
+
+- three independently useful package READMEs included in their npm tarballs
+- executable examples verified from a temporary external consumer
+- a machine-checked public-export inventory
+
+### Workstream 3: Build the standalone quickstart
+
+Expand `apps/standalone/README.md` in user-journey order:
+
+1. Put an early-public-beta notice and the single-workspace/security boundary
+   before the quickstart.
+2. Publish a tested prerequisites table for Node, pnpm on the source path,
+   PostgreSQL, `psql`, and the required Anthropic account/key.
+3. Provide separate setup sequences for:
+   - downloading, verifying, and extracting the versioned GitHub archive; and
+   - cloning the repository and installing the locked workspace dependencies.
+4. Cover database/user creation, `.env` creation, secure local-token generation,
+   Anthropic generation configuration, optional embeddings, and migration. Use
+   `psql` for the archive path and the workspace migration command for the source
+   path.
+5. Cover start/stop behavior, `/healthz`, the authenticated
+   `/api/mcp/entellix/mcp` endpoint, one tested MCP client configuration, and a
+   first save/process/retrieve round trip.
+6. Document bearer-authenticated operator examples for listing/deciding reviews,
+   running retention, exporting data, and confirmed workspace deletion. Put the
+   irreversible deletion warning before its command.
+7. Close with backup/restore expectations, TLS and reverse-proxy guidance,
+   database and secret protection, provider data handling, observability limits,
+   upgrade guidance, and explicit non-goals for the standalone beta.
+
+Deliverables:
+
+- an archive-first quickstart that also covers contributors
+- copy/paste-safe commands using placeholders consistently
+- operator and production-security reference sections
+
+### Workstream 4: Prove the quickstart from a clean room
+
+1. Add a standalone smoke runner that accepts an archive path or release URL and
+   creates all working files under a temporary directory.
+2. In PR CI, use a PostgreSQL service and the locally assembled archive to prove
+   extraction, environment loading, SQL migration, startup, health, bearer-token
+   rejection/acceptance, and MCP discovery without external provider calls.
+3. Verify that the README commands used by that runner still match the packaged
+   archive layout, including `.env.example`, `migrations`, `server`, and the
+   start command. Include the runner in the archive if the README asks users to
+   invoke it.
+4. Before release, run the same clean-room flow against the candidate archive
+   with real Anthropic credentials, enable embeddings once and leave them
+   disabled once, and prove the documented save/process/retrieve round trip.
+5. Record the tested OS, Node, PostgreSQL, archive version, model configuration,
+   and pass/fail result in the implementation PR. Do not record credentials,
+   database contents, or raw provider responses.
+
+Deliverables:
+
+- deterministic standalone documentation smoke coverage in CI
+- a repeatable provider-backed release checklist
+- evidence that the packaged README, not repository knowledge, is sufficient
+
+### Workstream 5: Integrate, review, and release
+
+1. Keep behavioral changes limited to what the documented path exposes. If the
+   clean-room test reveals a missing migration/start/smoke entry point, add the
+   smallest public fix with a failing focused test first.
+2. Update `scripts/package-standalone.mjs` only as needed to include files that
+   the packaged README actually references.
+3. Add a Changeset for the three npm README updates and the standalone
+   distribution update.
+4. Run the focused documentation/package gates during development, then run
+   `pnpm check:all` before handoff.
+5. Open one focused implementation PR. Include the clean-room evidence,
+   screenshots or logs only where they improve review, and a checklist mapped
+   to every Phase 2 acceptance criterion.
+
+### Implementation sequence
+
+1. Approve the four decisions above and select the tested PostgreSQL versions
+   and MCP client.
+2. Land the failing documentation/export checks.
+3. Write and verify the package READMEs.
+4. Write the standalone quickstart and credential-free artifact smoke path.
+5. Run the provider-backed clean-room flow, fix only gaps it exposes, and add
+   the Changeset.
+6. Run `pnpm check:all` and submit the implementation PR for review.
 
 ### Phase 2 acceptance
 
 - A developer unfamiliar with the repository can complete the documented
-  standalone quickstart without private knowledge.
+  standalone archive quickstart without private knowledge or a source checkout.
 - Every npm package README shows an ordinary package-manager install and at
   least one working import/use example.
-- Documented commands and imports are checked in CI.
+- Every documented package entry point matches the published export map, and
+  implementation-only paths are clearly excluded.
+- Documented commands and imports that do not require third-party credentials
+  are checked in CI from packed artifacts.
+- The provider-backed save/process/retrieve flow passes from a clean directory
+  by following only the packaged README.
+- Review, retention, export, and confirmed deletion examples are authenticated,
+  tested, and carry appropriate safety language.
 - The repository clearly labels the release as an early public beta rather than
   a turnkey managed service.
+
+### Phase 2 implementation evidence
+
+- The three package READMEs contain executable examples and manifest-checked
+  public export inventories. `pnpm release:documentation:verify` runs them from
+  packed tarballs in a temporary external consumer.
+- The standalone archive now includes an idempotent `npm run migrate` command.
+  Artifact assembly preserves the pnpm dependency graph rather than flattening
+  symlinked packages and losing transitive runtime dependencies.
+- `pnpm release:standalone:smoke` extracts the archive into a temporary
+  directory, runs migrations twice, starts the built server, and verifies
+  health, bearer authentication, MCP initialization/tool discovery, operator
+  routes, export, and confirmed deletion.
+- The credential-free clean-room smoke passed on macOS with Node 24.10.0, a
+  PostgreSQL 16 container, and the locally assembled `0.1.1` archive. Pull
+  request CI repeats it for PostgreSQL 16, 17, and 18.
+- The same runner supports `--provider-round-trip` for the pre-release
+  Anthropic-backed save/process/list proof. That release evidence remains
+  pending because no provider credentials were available in the implementation
+  environment.
 
 ## Phase 3: Normalize Public Status and Governance
 
@@ -142,22 +308,16 @@ artifacts and documentation.
 - CI, dependency security, secret, legal, package-content, and documentation
   gates pass on the released commit.
 
-## Recommended First Task in the New Project
+## Phase 2 Review Checklist
 
-Repair release topology and backfill the standalone artifact before expanding
-documentation. This closes the only current gap where a public release claims a
-standalone distribution but provides no downloadable distribution.
-
-Start by inspecting:
-
-- `.github/workflows/release.yml`
-- `.github/workflows/canary.yml`
-- `.github/workflows/standalone-release.yml`
-- `scripts/package-standalone.mjs`
-- the `@entellix/standalone@0.1.0` GitHub release
-
-Run before handoff:
-
-```sh
-pnpm check:all
-```
+- [x] The supported PostgreSQL range is evidence-based and small enough to test.
+- [x] The selected MCP client can authenticate to the standalone streamable HTTP
+      endpoint with copy/pasteable public configuration.
+- [x] CI coverage is credential-free while the release gate still proves the
+      real model-backed memory round trip.
+- [x] Export documentation is derived from, and checked against, package
+      manifests rather than maintained as an unchecked parallel list.
+- [x] Destructive operator examples are clearly separated from the quickstart
+      and require explicit confirmation.
+- [x] The work stays within documentation, verification tooling, and the
+      smallest product fixes discovered by the clean-room test.

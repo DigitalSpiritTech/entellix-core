@@ -31,3 +31,51 @@ jobs:
 
       - name: Run public workspace gates
         run: pnpm check:all
+
+  standalone-clean-room:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        postgres: [16, 17, 18]
+    services:
+      postgres:
+        image: postgres:${{ matrix.postgres }}
+        env:
+          POSTGRES_DB: entellix_smoke
+          POSTGRES_PASSWORD: entellix
+          POSTGRES_USER: entellix
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U entellix -d entellix_smoke"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Assemble standalone archive
+        run: pnpm release:standalone:artifact
+
+      - name: Follow the packaged clean-room path
+        env:
+          ENTELLIX_SMOKE_DATABASE_URL: postgres://entellix:entellix@127.0.0.1:5432/entellix_smoke
+        run: |
+          standalone_version="$(node -p "require('./apps/standalone/package.json').version")"
+          pnpm release:standalone:smoke -- \
+            --archive "artifacts/entellix-standalone-${standalone_version}.tgz"
