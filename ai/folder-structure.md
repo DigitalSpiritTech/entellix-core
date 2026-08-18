@@ -1,7 +1,7 @@
 # Folder structure
 
 - `.changeset/` — pending public release intent and Changesets configuration.
-- `.github/` — pull-request, release, canary, and standalone artifact workflows.
+- `.github/` — pull-request checks and the trusted package/standalone release workflow.
 - `ai/` — durable agent-facing architecture and implementation context.
 - `apps/standalone/` — single-workspace reference host and release artifact.
 - `packages/contracts/` — public runtime contracts.
