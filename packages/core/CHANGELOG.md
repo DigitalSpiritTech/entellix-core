@@ -1,5 +1,13 @@
 # @entellix/core
 
+## 0.1.1
+
+### Patch Changes
+
+- 57d4340: Describe Entellix Core entirely through its public package and host contracts,
+  without referencing private product architecture.
+  - @entellix/contracts@0.1.1
+
 ## 0.1.0
 
 ### Minor Changes
