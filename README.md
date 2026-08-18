@@ -5,9 +5,8 @@ MCP-capable AI clients. This repository contains the provider-neutral memory
 engine, its versioned Zod contracts, reusable MCP instructions, and a
 single-workspace self-hosted server.
 
-The hosted Entellix SaaS consumes these packages. Hosted authentication,
-multi-tenancy, billing, web applications, and managed operations remain outside
-this repository.
+Each package can be consumed through its documented public exports, while the
+standalone server provides a complete single-workspace composition.
 
 ## Workspace
 

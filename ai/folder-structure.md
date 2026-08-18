@@ -7,6 +7,9 @@
 - `packages/contracts/` — public runtime contracts.
 - `packages/core/` — public provider- and persistence-neutral engine.
 - `packages/instructions/` — public MCP guidance and setup templates.
+- `plan/` — temporary active implementation plans; remove a plan after its
+  acceptance criteria are complete and preserve durable outcomes in `ai/`.
 - `scripts/` — package, artifact, security, and release verification gates.
 
-Do not add hosted SaaS applications or private adapters to this repository.
+Keep additions within the public packages, standalone host, release tooling, or
+their supporting documentation and tests.

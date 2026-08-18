@@ -4,19 +4,16 @@
 
 Start with `ai/index.md`, then open only the documents needed for the task.
 
-## Repository boundary
+## Repository scope
 
 This repository owns the public Entellix contracts, provider- and
 persistence-neutral memory engine, MCP instructions, and single-workspace
-standalone host. It must not depend on hosted Entellix API, web, database,
-authentication, billing, tenant-lifecycle, or private evaluation code.
-
-The dependency direction is one-way: hosted Entellix applications consume
-versioned public packages from this repository.
+standalone host. Keep its packages independently buildable, publishable, and
+usable through their documented public exports.
 
 ## Working rules
 
-- Keep changes narrow and protect the public/private boundary.
+- Keep changes narrow and protect the documented public package surface.
 - Use TDD for product behavior and run the focused gate before handoff.
 - Prefer functional TypeScript; avoid classes unless a framework requires them.
 - Declare types in this order: inferred from Zod with `z.infer`, unions or

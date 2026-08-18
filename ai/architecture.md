@@ -9,10 +9,10 @@ Entellix Core separates pure memory behavior from its hosts.
 4. `@entellix/standalone` composes the public packages with Mastra, model
    providers, and PostgreSQL for one self-hosted workspace.
 
-The hosted Entellix SaaS is a downstream consumer. SaaS-only authentication,
-tenant resolution, row-level security, billing, UI, and managed infrastructure
-do not flow back into the public packages.
+Package dependencies point from the standalone composition toward the public
+packages and from core toward contracts. Contracts and instructions remain
+independently consumable. Model providers, persistence, identity, and runtime
+effects enter through explicit ports at composition boundaries.
 
-Organization-aware memory contracts are domain concepts, not a hosted tenant
-implementation. The standalone host resolves all requests within its single
-configured workspace and has no tenant provisioning or cross-workspace path.
+The standalone host resolves every request within its single configured
+workspace.
