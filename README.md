@@ -33,7 +33,17 @@ pnpm check
 pnpm build
 ```
 
-Run the standalone host with `pnpm dev`. See
+For an isolated local evaluation, copy
+`apps/standalone/.env.compose.example` to `apps/standalone/.env.compose`, set an
+Anthropic key and random bearer token, then run:
+
+```sh
+docker compose up --build --detach --wait
+```
+
+This starts the packaged standalone host and a private PostgreSQL 16 database;
+it does not connect to PostgreSQL running on the host. For source development,
+run the standalone host with `pnpm dev`. See
 [`apps/standalone/README.md`](apps/standalone/README.md) for configuration,
 migration, and deployment details.
 

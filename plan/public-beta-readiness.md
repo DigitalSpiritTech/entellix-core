@@ -86,8 +86,9 @@ service, multi-workspace operation, or a new provider abstraction.
 1. Treat only package specifiers present in a published package's `exports` map
    as supported public-beta entry points. `src`, `dist`, and undeclared deep
    imports remain implementation details.
-2. Support and document two standalone paths: the GitHub release archive for
-   evaluators and a source checkout for contributors. Keep their commands
+2. Support and document three standalone paths: Docker Compose for isolated
+   local evaluation, the GitHub release archive for published-version
+   evaluation, and a source checkout for contributors. Keep their commands
    separate wherever installation, migration, or startup differs.
 3. Determine the PostgreSQL support floor by exercising the quickstart against
    the oldest version selected for support and the current stable major; do not
@@ -154,6 +155,8 @@ Expand `apps/standalone/README.md` in user-journey order:
 2. Publish a tested prerequisites table for Node, pnpm on the source path,
    PostgreSQL, `psql`, and the required Anthropic account/key.
 3. Provide separate setup sequences for:
+   - building and starting the packaged server with an isolated PostgreSQL 16
+     service through Docker Compose;
    - downloading, verifying, and extracting the versioned GitHub archive; and
    - cloning the repository and installing the locked workspace dependencies.
 4. Cover database/user creation, `.env` creation, secure local-token generation,
@@ -251,6 +254,10 @@ Deliverables:
 - The standalone archive now includes an idempotent `npm run migrate` command.
   Artifact assembly preserves the pnpm dependency graph rather than flattening
   symlinked packages and losing transitive runtime dependencies.
+- `docker compose up --build --detach --wait` runs that verified archive as a
+  non-root container with a private PostgreSQL 16 service and persistent named
+  volume. Its automated smoke checks migration, health, and bearer
+  authentication, then removes only its uniquely named disposable test volume.
 - `pnpm release:standalone:smoke` extracts the archive into a temporary
   directory, runs migrations twice, starts the built server, and verifies
   health, bearer authentication, MCP initialization/tool discovery, operator
@@ -319,5 +326,7 @@ Deliverables:
       manifests rather than maintained as an unchecked parallel list.
 - [x] Destructive operator examples are clearly separated from the quickstart
       and require explicit confirmation.
+- [x] The default local evaluation path isolates PostgreSQL from host databases
+      and documents the difference between stopping and deleting its volume.
 - [x] The work stays within documentation, verification tooling, and the
       smallest product fixes discovered by the clean-room test.

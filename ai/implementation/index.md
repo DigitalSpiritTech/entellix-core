@@ -2,6 +2,20 @@
 
 ## Local setup
 
+The isolated standalone evaluation path builds the release archive into a
+non-root image and starts it with a private PostgreSQL 16 service:
+
+```sh
+cp apps/standalone/.env.compose.example apps/standalone/.env.compose
+docker compose up --build --detach --wait
+```
+
+Set a real Anthropic key and random bearer token in `.env.compose` first. Use
+`docker compose down` to preserve the named database volume, or
+`docker compose down --volumes` only when intentionally deleting its data.
+
+For source development:
+
 ```sh
 corepack enable
 pnpm install
@@ -18,6 +32,9 @@ pnpm install
   against the publish manifests.
 - `pnpm release:standalone:verify` — assembles and inspects the standalone
   tarball in a temporary directory.
+- `pnpm release:standalone:compose:smoke` — builds the runtime image, starts an
+  isolated Compose project, checks migration/health/authentication, and removes
+  its disposable database volume.
 - `pnpm check:all` — runs all of the above release gates, including dependency,
   secret, and license checks.
 

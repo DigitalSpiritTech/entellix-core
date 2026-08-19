@@ -12,19 +12,67 @@ an untrusted network without the production controls described below.
 
 ## Prerequisites
 
+The recommended local evaluation path requires Docker Desktop or Docker Engine
+with Compose, plus an Anthropic API key. It does not use a host PostgreSQL
+installation.
+
+The manual paths have these additional requirements:
+
 | Dependency        | Supported or required                                                    |
 | ----------------- | ------------------------------------------------------------------------ |
 | Node.js           | 24 or newer                                                              |
 | PostgreSQL server | 16, 17, or 18                                                            |
 | `psql`            | Required for archive migrations; use a client compatible with the server |
 | pnpm              | 11.9.0, source-checkout path only                                        |
-| Anthropic         | API key with access to the configured generation model                   |
 | GitHub CLI        | Archive path only; required to download and verify the attestation       |
 
 The PostgreSQL range is exercised by the repository clean-room CI matrix. The
 default generation model is `claude-haiku-4-5-20251001`. Confirm that the model
 is available to your Anthropic account or set `ENTELLIX_GENERATION_MODEL` to a
 compatible Anthropic model you can use.
+
+## Quickstart with Docker Compose
+
+This is the recommended way to evaluate Entellix locally from a source
+checkout. It builds the verified standalone archive, runs it as a non-root
+container, and starts PostgreSQL 16 on a private Compose network. PostgreSQL is
+not published to the host, and this path does not read
+`apps/standalone/.env` or connect to a host database.
+
+```sh
+git clone https://github.com/DigitalSpiritTech/entellix-core.git
+cd entellix-core
+cp apps/standalone/.env.compose.example apps/standalone/.env.compose
+openssl rand -hex 32
+nano apps/standalone/.env.compose
+```
+
+Set the generated token and your Anthropic key:
+
+```dotenv
+ENTELLIX_LOCAL_TOKEN=<output-from-openssl>
+ANTHROPIC_API_KEY=<anthropic-api-key>
+```
+
+Build the image, start the isolated stack, and wait for both services to become
+healthy:
+
+```sh
+docker compose up --build --detach --wait
+docker compose logs --follow standalone
+```
+
+The API is available at `http://localhost:4211`. Compose stores database files
+in the `entellix-local_entellix-postgres-data` named volume. Stop the services
+without deleting memories with:
+
+```sh
+docker compose down
+```
+
+To intentionally delete the Compose database and start over, run
+`docker compose down --volumes`. That operation permanently removes memories in
+the Compose volume; it does not affect a host PostgreSQL database.
 
 ## Quickstart from the release archive
 
@@ -98,15 +146,15 @@ pnpm install --frozen-lockfile
 cp apps/standalone/.env.example apps/standalone/.env
 ```
 
-Edit `apps/standalone/.env`, then export it into the current shell before using
-the workspace commands:
+Remain in the repository root, edit `apps/standalone/.env`, then export it into
+the current shell before using the root workspace commands:
 
 ```sh
 set -a
-. apps/standalone/.env
+source ./apps/standalone/.env
 set +a
-pnpm standalone:migrate
-pnpm dev
+pnpm run standalone:migrate
+pnpm run dev
 ```
 
 The development server defaults to port `4211`.
