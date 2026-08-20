@@ -1,0 +1,37 @@
+name: Proposal
+description: Propose a focused contract, engine, instruction, standalone, or release change.
+title: "[Proposal]: "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Describe the user or maintainer problem without prescribing an implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Proposed scope and public-surface impact
+      description: Identify affected packages, exports, standalone behavior, or release guarantees.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+    validations:
+      required: false
+  - type: checkboxes
+    id: boundaries
+    attributes:
+      label: Boundary check
+      options:
+        - label: This proposal preserves the provider-neutral core and single-workspace standalone boundary, or explains why an ADR should change it.
+          required: true

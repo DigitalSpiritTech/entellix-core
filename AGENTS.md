@@ -4,6 +4,32 @@
 
 Start with `ai/index.md`, then open only the documents needed for the task.
 
+## Entellix memory
+
+An Entellix Brain is connected over MCP and is the durable memory for work in
+this repository.
+
+- At the start of every conversation, and before responding to or acting on
+  every new user directive, call `get_context`. Summarize the active task,
+  repository, files, named people, tools, decisions, and constraints in
+  `taskContext`; use returned memories as quiet working context.
+- Attribute recall and capture at this layer to client **Digital Spirit
+  Technology** and project **Entellix**. Include
+  `Client: Digital Spirit Technology; Project: Entellix` in `taskContext` and
+  in the `sessionNote` or `sourceContext` of capture calls. Use organization
+  scope for explicit `save_memory` calls at this layer.
+- When the user clearly states or changes a durable preference, decision, fact,
+  correction, rule, or procedure, call `save_memory` without asking permission.
+  For a broader exchange that may contain multiple durable items, call
+  `log_context` with the relevant raw exchange instead. Do not submit the same
+  context through both tools.
+- When a meaningful task is complete, call `save_memory` with a concise summary
+  of the durable outcome, including important decisions and changed behavior;
+  omit transient execution details.
+- Memory processing is asynchronous. A queued receipt confirms intake, not that
+  a memory has already been committed. Do not announce retrieval or expose
+  memory-review links unless the user asks.
+
 ## Repository scope
 
 This repository owns the public Entellix contracts, provider- and

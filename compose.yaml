@@ -1,0 +1,56 @@
+name: entellix-local
+
+services:
+  postgres:
+    image: postgres:16-bookworm
+    environment:
+      POSTGRES_DB: entellix
+      POSTGRES_PASSWORD: entellix-local-only
+      POSTGRES_USER: entellix
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U entellix -d entellix"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    volumes:
+      - entellix-postgres-data:/var/lib/postgresql/data
+
+  standalone:
+    build:
+      context: .
+      dockerfile: apps/standalone/Dockerfile
+    init: true
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - ${ENTELLIX_ENV_FILE:-./apps/standalone/.env.compose}
+    environment:
+      DATABASE_URL: postgres://entellix:entellix-local-only@postgres:5432/entellix
+      ENTELLIX_API_URL: http://localhost:${ENTELLIX_PORT:-4211}
+      MASTRA_HOST: 0.0.0.0
+      NODE_ENV: production
+      PORT: "4211"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "--input-type=module",
+          "--eval",
+          "const response = await fetch('http://127.0.0.1:4211/healthz'); if (!response.ok) process.exit(1)",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+    ports:
+      - "127.0.0.1:${ENTELLIX_PORT:-4211}:4211"
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp
+
+volumes:
+  entellix-postgres-data:

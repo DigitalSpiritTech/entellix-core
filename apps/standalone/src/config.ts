@@ -5,6 +5,9 @@ import { STANDALONE_ACTOR_ID, STANDALONE_WORKSPACE_ID } from "./contracts.ts";
 const integerFromEnv = (fallback: number, minimum: number) =>
   z.coerce.number().int().min(minimum).default(fallback);
 
+const optionalFromEnv = <Schema extends z.ZodType>(schema: Schema) =>
+  z.preprocess((value) => (value === "" ? undefined : value), schema.optional());
+
 export const standaloneConfigSchema = z.object({
   DATABASE_URL: z.url(),
   ENTELLIX_LOCAL_TOKEN: z.string().min(24),
@@ -20,8 +23,8 @@ export const standaloneConfigSchema = z.object({
   ENTELLIX_WORKER_BATCH_SIZE: integerFromEnv(10, 1),
   ANTHROPIC_API_KEY: z.string().min(1),
   ENTELLIX_GENERATION_MODEL: z.string().min(1).default("claude-haiku-4-5-20251001"),
-  ENTELLIX_EMBEDDING_URL: z.url().optional(),
-  ENTELLIX_EMBEDDING_API_KEY: z.string().min(1).optional(),
+  ENTELLIX_EMBEDDING_URL: optionalFromEnv(z.url()),
+  ENTELLIX_EMBEDDING_API_KEY: optionalFromEnv(z.string().min(1)),
   ENTELLIX_EMBEDDING_MODEL: z.string().min(1).default("voyage-4"),
 });
 export type StandaloneConfig = z.infer<typeof standaloneConfigSchema>;

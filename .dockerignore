@@ -1,0 +1,15 @@
+.git
+.github
+.turbo
+artifacts
+coverage
+node_modules
+**/node_modules
+**/.mastra
+**/dist
+**/*.log
+**/*.tsbuildinfo
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.compose.example

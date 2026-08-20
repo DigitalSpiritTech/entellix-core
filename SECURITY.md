@@ -14,10 +14,14 @@ disclosure with the reporter.
 
 ## Supported releases
 
-Until the first public release, only the current `main` branch is eligible for
-security fixes. After release, the latest stable version and any explicitly
-listed supported release line receive fixes. Canary versions are for validation
-and do not carry a stability or support commitment.
+Entellix Core is in early public beta. The latest published `0.x` release is the
+supported line. Older `0.x` releases, prereleases, canaries, and the development
+state on `main` do not carry a support commitment unless a security advisory
+explicitly says otherwise.
+
+Security fixes normally target the latest release and the next release from
+`main`; maintainers may publish an exceptional backport when impact warrants it.
+See [SUPPORT.md](SUPPORT.md) for compatibility and breaking-change policy.
 
 ## Release controls
 
@@ -25,3 +29,8 @@ Public releases require production dependency audit, secret review, compiled
 package-content verification, legal preflight, and provenance-producing CI.
 Credentials and customer data must never be committed or included in release
 artifacts.
+
+The first public packages (`0.1.0`) shipped through npm trusted publishing with
+OIDC-generated provenance. Starting with `0.1.1`, the same release workflow also
+builds, attests, uploads, and verifies the matching standalone archive. Stable
+publishing does not use a long-lived npm token.
