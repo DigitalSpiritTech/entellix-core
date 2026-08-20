@@ -1,3 +1,13 @@
+/**
+ * Tests data rights behavior.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import { describe, expect, it, vi } from "vitest";
 
 import { serializeDataRightsExport, type DataRightsExport } from "../src/data-rights.ts";

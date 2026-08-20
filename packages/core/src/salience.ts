@@ -1,3 +1,13 @@
+/**
+ * Implements salience behavior for this TypeScript module.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import {
   type HotTriggerHit,
   type LexiconCategory,
@@ -60,7 +70,12 @@ export const SALIENCE_LEXICON = {
   categories: SALIENCE_TRIGGER_LEXICON,
 } as const;
 
-/** Escapes a lexicon phrase so it can be embedded in a RegExp source safely. */
+/** Escapes a lexicon phrase so it can be embedded in a RegExp source safely.
+ *
+ * @param phrase - Value supplied for `phrase`.
+ * @returns The result produced by `escapeForRegExp`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function escapeForRegExp(phrase: string): string {
   return phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
@@ -80,6 +95,10 @@ interface SpannedHit extends HotTriggerHit {
  * "always"/"never" match that sits entirely inside an "i always"/"i never"
  * preference match is dropped, so "I always run the linter" is a
  * `preference_marker`, not a `directive_marker`.
+ *
+ * @param text - Value supplied for `text`.
+ * @returns The result produced by `detectHotTriggers`.
+ * @throws Errors raised by validation or dependent operations.
  */
 export function detectHotTriggers(text: string): HotTriggerHit[] {
   const haystack = text.toLowerCase();
@@ -119,12 +138,13 @@ const NOVELTY_BATCH_THRESHOLD = 0.5;
  * - no trigger + novel content → `batch`;
  * - no trigger + low novelty, not a duplicate → `hold`.
  * The `reason` names the deciding trigger category or novelty basis.
+ *
+ * @param input - Trigger and novelty signals used to select a route.
+ * @returns The result produced by `decideRoute`.
+ * @throws Errors raised by validation or dependent operations.
  */
-export function decideRoute({
-  triggers,
-  noveltyScore,
-  nearDuplicate,
-}: RouteDecisionInput): RouteDecision {
+export function decideRoute(input: RouteDecisionInput): RouteDecision {
+  const { triggers, noveltyScore, nearDuplicate } = input;
   routeDecisionInputSchema.parse({ triggers, noveltyScore, nearDuplicate });
   const [lead] = triggers;
   if (lead) {

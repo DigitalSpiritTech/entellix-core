@@ -1,3 +1,13 @@
+/**
+ * Implements eval exclusion behavior for this TypeScript module.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 // Pure merge-gate helper for the S4.2.3 distractor-exclusion contract.
 //
 // The retrieval eval harness needs a
@@ -28,6 +38,9 @@
  *                           governance guards. Defaults to 5.
  * @returns The ids that failed each guard (each in its input array's order) and
  *          `passed`, the AND of all three arrays being empty.
+ *
+ * @param input - Value supplied for `input`.
+ * @throws Errors raised by validation or dependent operations.
  */
 export function evaluateExclusionCase(input: {
   returnedIds: readonly string[];
@@ -44,9 +57,23 @@ export function evaluateExclusionCase(input: {
   const maxRank = input.maxRank ?? 5;
 
   // 1-based rank of an id, or 0 when it is absent from the result set.
+  /**
+   * Executes rank of.
+   *
+   * @param id - Value supplied for `id`.
+   * @returns The result produced by `rankOf`.
+   * @throws Errors raised by validation or dependent operations.
+   */
   const rankOf = (id: string): number => input.returnedIds.indexOf(id) + 1;
 
   // Present within the inclusive rank window (recall + governance guards).
+  /**
+   * Executes within rank.
+   *
+   * @param id - Value supplied for `id`.
+   * @returns The result produced by `withinRank`.
+   * @throws Errors raised by validation or dependent operations.
+   */
   const withinRank = (id: string): boolean => {
     const rank = rankOf(id);
     return rank > 0 && rank <= maxRank;

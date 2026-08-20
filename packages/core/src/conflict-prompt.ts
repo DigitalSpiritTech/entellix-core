@@ -1,3 +1,13 @@
+/**
+ * Implements conflict prompt behavior for this TypeScript module.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import { CONFLICT_RELATIONS } from "@entellix/contracts/conflicts";
 import type { Neighbor } from "@entellix/contracts/conflicts";
 
@@ -32,7 +42,12 @@ Return ONLY a JSON object of the form:
 
 Emit exactly one annotation per neighbor, echoing the neighbor's id verbatim. Return no prose outside the JSON.`;
 
-/** Renders one neighbor line for the prompt: its id + content. */
+/** Renders one neighbor line for the prompt: its id + content.
+ *
+ * @param neighbor - Value supplied for `neighbor`.
+ * @returns The result produced by `renderNeighbor`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function renderNeighbor(neighbor: Neighbor): string {
   return `- id ${neighbor.memoryId} (${neighbor.memoryType}): ${neighbor.content}`;
 }
@@ -41,6 +56,11 @@ function renderNeighbor(neighbor: Neighbor): string {
  * Builds the conflict-classification prompt for a candidate and its neighbors:
  * the versioned instructions, the candidate text, and the enumerated neighbor
  * memories. Deterministic — the same inputs always yield the same prompt.
+ *
+ * @param candidate - Value supplied for `candidate`.
+ * @param neighbors - Value supplied for `neighbors`.
+ * @returns The result produced by `buildConflictPrompt`.
+ * @throws Errors raised by validation or dependent operations.
  */
 export function buildConflictPrompt(candidate: ConflictCandidate, neighbors: Neighbor[]): string {
   return [

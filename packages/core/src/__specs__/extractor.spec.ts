@@ -1,3 +1,13 @@
+/**
+ * Tests extractor behavior.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import {
   CANDIDATE_REASON_MAX_LENGTH,
   EXTRACTOR_PROMPT_VERSION,
@@ -36,7 +46,12 @@ const CONFIG: ExtractorConfig = {
   promptVersion: EXTRACTOR_PROMPT_VERSION,
 };
 
-/** A provider-neutral event for the batch input. */
+/** A provider-neutral event for the batch input.
+ *
+ * @param rawText - Value supplied for `rawText`.
+ * @returns The result produced by `eventRow`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function eventRow(rawText: string): ExtractorEvent {
   return {
     id: "00000000-0000-4000-8000-0000000000e0",
@@ -45,7 +60,12 @@ function eventRow(rawText: string): ExtractorEvent {
   };
 }
 
-/** Serialize a candidate list the way a well-behaved model would return it. */
+/** Serialize a candidate list the way a well-behaved model would return it.
+ *
+ * @param candidates - Value supplied for `candidates`.
+ * @returns The result produced by `modelOutput`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function modelOutput(candidates: unknown[]): string {
   return JSON.stringify({ candidates });
 }

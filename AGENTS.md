@@ -48,5 +48,8 @@ usable through their documented public exports.
 - Use Effect when typed failures, resource safety, retries, or composition make
   the behavior clearer; do not wrap simple pure functions without benefit.
 - Add a Changeset for user-visible package or standalone changes.
+- Keep TypeScript modules, classes, and documentable function declarations
+  compliant with the TSDoc contract in `ai/coding-standards.md`; run
+  `pnpm tsdoc:check` after changing TypeScript source.
 - Never commit secrets, customer data, generated release artifacts, or `.env`
   files.

@@ -1,3 +1,13 @@
+/**
+ * Implements data rights behavior for this TypeScript module.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import { createHash } from "node:crypto";
 
 import { z } from "zod";
@@ -84,12 +94,25 @@ export type DataRightsArtifactKind = z.infer<typeof dataRightsArtifactKindSchema
 export type DataRightsExportArtifact = z.infer<typeof dataRightsExportArtifactSchema>;
 export type DataRightsExport = z.infer<typeof dataRightsExportSchema>;
 
-/** Locale-independent lexicographic ordering for checksummed export content. */
+/** Locale-independent lexicographic ordering for checksummed export content.
+ *
+ * @param left - Value supplied for `left`.
+ * @param right - Value supplied for `right`.
+ * @returns The result produced by `compareDataRightsCanonicalStrings`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 export function compareDataRightsCanonicalStrings(left: string, right: string): number {
   if (left === right) return 0;
   return left < right ? -1 : 1;
 }
 
+/**
+ * Executes canonicalize.
+ *
+ * @param value - Value supplied for `value`.
+ * @returns The result produced by `canonicalize`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function canonicalize(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(canonicalize);
   if (value !== null && typeof value === "object") {
@@ -102,16 +125,33 @@ function canonicalize(value: unknown): unknown {
   return value;
 }
 
-/** Deterministic UTF-8 JSON used for both export delivery and checksums. */
+/** Deterministic UTF-8 JSON used for both export delivery and checksums.
+ *
+ * @param document - Value supplied for `document`.
+ * @returns The result produced by `serializeDataRightsExport`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 export function serializeDataRightsExport(document: DataRightsExport): string {
   return JSON.stringify(canonicalize(dataRightsExportSchema.parse(document)));
 }
 
+/**
+ * Parses data rights export json.
+ *
+ * @param json - Value supplied for `json`.
+ * @returns The result produced by `parseDataRightsExportJson`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 export function parseDataRightsExportJson(json: string): DataRightsExport {
   return verifyDataRightsExport(dataRightsExportSchema.parse(JSON.parse(json)));
 }
 
-/** The checksum covers the full document except the checksum field itself. */
+/** The checksum covers the full document except the checksum field itself.
+ *
+ * @param document - Value supplied for `document`.
+ * @returns The result produced by `checksumDataRightsExport`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 export function checksumDataRightsExport(
   document: Omit<DataRightsExport, "manifest"> & {
     manifest: Omit<DataRightsExport["manifest"], "checksum">;
@@ -122,7 +162,12 @@ export function checksumDataRightsExport(
     .digest("hex");
 }
 
-/** Verifies both the declared inventory size and checksum before consumption. */
+/** Verifies both the declared inventory size and checksum before consumption.
+ *
+ * @param document - Value supplied for `document`.
+ * @returns The result produced by `verifyDataRightsExport`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 export function verifyDataRightsExport(document: DataRightsExport): DataRightsExport {
   const parsed = dataRightsExportSchema.parse(document);
   if (parsed.manifest.artifactCount !== parsed.artifacts.length) {

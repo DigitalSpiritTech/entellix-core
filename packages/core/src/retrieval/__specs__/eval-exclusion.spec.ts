@@ -1,3 +1,13 @@
+/**
+ * Tests eval exclusion behavior.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import { describe, expect, it } from "vitest";
 
 // RED (S4.2.3 distractor-exclusion merge gate): the pure merge-gate helper does

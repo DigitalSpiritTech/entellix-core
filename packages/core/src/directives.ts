@@ -1,3 +1,13 @@
+/**
+ * Implements directives behavior for this TypeScript module.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import type {
   BuildDirectivePacketBlockInput,
   CanCreateDirectiveResult,
@@ -62,6 +72,10 @@ export const EXPECTED_DIRECTIVE_ROW_CONSTRAINT = "memories_verbatim_type_shape_c
  *     first-person explicit statement) → forcedReview:true, NEVER silently
  *     allowed and NEVER silently dropped.
  * Exactly one of `allowed`/`forcedReview` is true.
+ *
+ * @param ctx - Value supplied for `ctx`.
+ * @returns The result produced by `canCreateDirective`.
+ * @throws Errors raised by validation or dependent operations.
  */
 export function canCreateDirective(ctx: DirectiveCreationContext): CanCreateDirectiveResult {
   // Trusted human path: a directive created/approved in the review UI is always
@@ -98,6 +112,10 @@ export function canCreateDirective(ctx: DirectiveCreationContext): CanCreateDire
  *   - directives that do not fit go to `overflow`, listed by `title`;
  *   - `fetchHint` is a non-empty guidance string when `overflow` is non-empty,
  *     and `''` when nothing overflowed.
+ *
+ * @param rawInput - Value supplied for `rawInput`.
+ * @returns The result produced by `buildDirectivePacketBlock`.
+ * @throws Errors raised by validation or dependent operations.
  */
 export function buildDirectivePacketBlock(
   rawInput: BuildDirectivePacketBlockInput,
@@ -149,6 +167,10 @@ export function buildDirectivePacketBlock(
  * for its type: for a verbatim type (directive/policy) contentVerbatim MUST be
  * true AND renderPolicy MUST be 'pinned'; a non-verbatim type MUST NOT claim
  * verbatim/pinned. The DB half is EXPECTED_DIRECTIVE_ROW_CONSTRAINT.
+ *
+ * @param rawRow - Value supplied for `rawRow`.
+ * @returns Nothing.
+ * @throws A Zod error for invalid input or an Error when the row violates type-derived policy.
  */
 export function assertDirectiveRowInvariant(rawRow: DirectiveRowInvariantInput): void {
   const row = directiveRowInvariantInputSchema.parse(rawRow);

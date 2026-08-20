@@ -1,3 +1,13 @@
+/**
+ * Tests compose behavior.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import type { Resolution } from "@entellix/contracts/directive-precedence";
 import {
   PACKET_SECTIONS,
@@ -93,6 +103,13 @@ const RATIFIED_OVERRIDE_ANNOTATION =
 
 // One resolved, render-ready directive with an override annotation — the exact
 // shape resolveDirectives() emits (reused verbatim by the composer).
+/**
+ * Executes resolution.
+ *
+ * Inputs: None.
+ * @returns The result produced by `resolution`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function resolution(): Resolution {
   return {
     active: [
@@ -134,8 +151,22 @@ const procedures: ProcedureInput[] = [
 
 // Length-as-tokens estimator: makes budget arithmetic and the cost model
 // (estimatedTokens === rendered length) directly observable in tests.
+/**
+ * Executes length tokens.
+ *
+ * @param text - Value supplied for `text`.
+ * @returns The result produced by `lengthTokens`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 const lengthTokens: TokenEstimator = (text) => text.length;
 
+/**
+ * Executes full input.
+ *
+ * @param overrides - Value supplied for `overrides`.
+ * @returns The result produced by `fullInput`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function fullInput(overrides: Partial<ComposeMemoryPacketInput> = {}): ComposeMemoryPacketInput {
   return {
     directives: resolution(),
@@ -150,15 +181,36 @@ function fullInput(overrides: Partial<ComposeMemoryPacketInput> = {}): ComposeMe
   };
 }
 
+/**
+ * Executes memory count.
+ *
+ * @param packet - Value supplied for `packet`.
+ * @returns The result produced by `memoryCount`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function memoryCount(packet: ReturnType<typeof composeMemoryPacket>): number {
   return packet.memories.reduce((total, group) => total + group.memories.length, 0);
 }
 
+/**
+ * Executes flat memory ids.
+ *
+ * @param packet - Value supplied for `packet`.
+ * @returns The result produced by `flatMemoryIds`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function flatMemoryIds(packet: ReturnType<typeof composeMemoryPacket>): string[] {
   return packet.memories.flatMap((group) => group.memories.map((memory) => memory.memoryId));
 }
 
 // Deterministic PRNG (mulberry32) for the truncation property test.
+/**
+ * Executes mulberry32.
+ *
+ * @param seed - Value supplied for `seed`.
+ * @returns The result produced by `mulberry32`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function mulberry32(seed: number): () => number {
   let state = seed >>> 0;
   return () => {
@@ -195,6 +247,13 @@ describe("packet contracts (packages/contracts/src/packet.ts)", () => {
     const envelope = verifyContextEnvelope({
       actorUserId: USER_A,
       asserted: { orgId: ORG_A },
+      /**
+       * Resolves membership.
+       *
+       * Inputs: None.
+       * @returns The result produced by `resolveMembership`.
+       * @throws Errors raised by validation or dependent operations.
+       */
       resolveMembership: () => [membership],
     });
     expect(() => contextEnvelopeSchema.parse(envelope)).not.toThrow();
@@ -473,6 +532,13 @@ describe("verifyContextEnvelope — SERVER-verified, model assertions never trus
     const envelope = verifyContextEnvelope({
       actorUserId: USER_A,
       asserted: { orgId: ORG_A },
+      /**
+       * Resolves membership.
+       *
+       * Inputs: None.
+       * @returns The result produced by `resolveMembership`.
+       * @throws Errors raised by validation or dependent operations.
+       */
       resolveMembership: () => [activeGoodOrg],
     });
     expect(envelope.actorUserId).toBe(USER_A);
@@ -485,6 +551,13 @@ describe("verifyContextEnvelope — SERVER-verified, model assertions never trus
       actorUserId: USER_A,
       // The model asserts an org the caller does NOT belong to.
       asserted: { orgId: ORG_B },
+      /**
+       * Resolves membership.
+       *
+       * Inputs: None.
+       * @returns The result produced by `resolveMembership`.
+       * @throws Errors raised by validation or dependent operations.
+       */
       resolveMembership: () => [activeGoodOrg],
     });
     // Server resolution wins: the good org, never the forged one.
@@ -496,6 +569,13 @@ describe("verifyContextEnvelope — SERVER-verified, model assertions never trus
     const envelope = verifyContextEnvelope({
       actorUserId: USER_A,
       asserted: { orgId: ORG_B },
+      /**
+       * Resolves membership.
+       *
+       * Inputs: None.
+       * @returns The result produced by `resolveMembership`.
+       * @throws Errors raised by validation or dependent operations.
+       */
       resolveMembership: () => [],
     });
     expect(envelope.orgId).toBeNull();
@@ -506,6 +586,13 @@ describe("verifyContextEnvelope — SERVER-verified, model assertions never trus
     const envelope = verifyContextEnvelope({
       actorUserId: USER_A,
       asserted: { orgId: ORG_A },
+      /**
+       * Resolves membership.
+       *
+       * Inputs: None.
+       * @returns The result produced by `resolveMembership`.
+       * @throws Errors raised by validation or dependent operations.
+       */
       resolveMembership: () => [{ organizationId: ORG_A, role: "member", status: "revoked" }],
     });
     expect(envelope.orgId).toBeNull();
@@ -517,8 +604,22 @@ describe("verifyContextEnvelope — SERVER-verified, model assertions never trus
     const envelope = verifyContextEnvelope({
       actorUserId: USER_A,
       asserted: { orgId: ORG_A, entityIds: [entEvil, entGood] },
+      /**
+       * Resolves membership.
+       *
+       * Inputs: None.
+       * @returns The result produced by `resolveMembership`.
+       * @throws Errors raised by validation or dependent operations.
+       */
       resolveMembership: () => [activeGoodOrg],
-      resolveEntityIds: ({ candidateIds }) => candidateIds.filter((id) => id === entGood),
+      /**
+       * Resolves entity ids.
+       *
+       * @param input - Candidate entity identifiers supplied for verification.
+       * @returns The result produced by `resolveEntityIds`.
+       * @throws Errors raised by validation or dependent operations.
+       */
+      resolveEntityIds: (input) => input.candidateIds.filter((id) => id === entGood),
     });
     expect(envelope.entityIds).toEqual([entGood]);
     expect(envelope.entityIds).not.toContain(entEvil);
@@ -529,6 +630,13 @@ describe("verifyContextEnvelope — SERVER-verified, model assertions never trus
     const envelope = verifyContextEnvelope({
       actorUserId: USER_A,
       asserted: { orgId: ORG_A, entityIds: [entEvil] },
+      /**
+       * Resolves membership.
+       *
+       * Inputs: None.
+       * @returns The result produced by `resolveMembership`.
+       * @throws Errors raised by validation or dependent operations.
+       */
       resolveMembership: () => [activeGoodOrg],
     });
     expect(envelope.entityIds).toEqual([]);

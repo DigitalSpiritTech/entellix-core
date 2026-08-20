@@ -1,3 +1,13 @@
+/**
+ * Tests boundary behavior.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import { readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -31,6 +41,13 @@ const ALLOWED_EXPORTED_INTERFACES = [
   "VerifyContextEnvelopeInput",
 ] as const;
 
+/**
+ * Executes source files.
+ *
+ * @param directory - Value supplied for `directory`.
+ * @returns The result produced by `sourceFiles`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function sourceFiles(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const path = join(directory, entry.name);

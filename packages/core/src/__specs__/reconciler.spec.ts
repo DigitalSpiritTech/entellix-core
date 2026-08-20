@@ -1,3 +1,13 @@
+/**
+ * Tests reconciler behavior.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import { TYPE_DERIVED_POLICIES } from "@entellix/contracts/reconciler";
 import type { MemoryType } from "@entellix/contracts/reconciler";
 import { describe, expect, it } from "vitest";

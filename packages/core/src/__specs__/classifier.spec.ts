@@ -1,3 +1,13 @@
+/**
+ * Tests classifier behavior.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import type { MemoryCandidate } from "@entellix/contracts/candidates";
 import { ENTITY_TYPES } from "@entellix/contracts";
 import {
@@ -48,7 +58,13 @@ const ACME_ENTITY_ID = "00000000-0000-4000-8000-0000000000c1";
 
 let candidateSeq = 0;
 
-/** A minimal but complete memory_candidates row for the classifier input. */
+/** A minimal but complete memory_candidates row for the classifier input.
+ *
+ * @param candidateText - Value supplied for `candidateText`.
+ * @param overrides - Value supplied for `overrides`.
+ * @returns The result produced by `candidate`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function candidate(
   candidateText: string,
   overrides: Partial<MemoryCandidate> = {},
@@ -72,7 +88,12 @@ function candidate(
   };
 }
 
-/** A valid ClassifierLlmOutput with overridable axes (the model's raw verdict). */
+/** A valid ClassifierLlmOutput with overridable axes (the model's raw verdict).
+ *
+ * @param overrides - Value supplied for `overrides`.
+ * @returns The result produced by `llmOutput`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function llmOutput(overrides: Partial<ClassifierLlmOutput> = {}): ClassifierLlmOutput {
   return {
     memoryType: "fact",
@@ -87,27 +108,64 @@ function llmOutput(overrides: Partial<ClassifierLlmOutput> = {}): ClassifierLlmO
   };
 }
 
-/** A generate() fake that returns one serialized model verdict. */
+/** A generate() fake that returns one serialized model verdict.
+ *
+ * @param output - Value supplied for `output`.
+ * @returns The result produced by `generateReturning`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function generateReturning(output: ClassifierLlmOutput): ClassifierGenerateFn {
   return vi.fn<ClassifierGenerateFn>(async () => JSON.stringify(output));
 }
 
-/** A provider-neutral entity the resolver fake can hand back on a match. */
+/** A provider-neutral entity the resolver fake can hand back on a match.
+ *
+ * @param id - Value supplied for `id`.
+ * @param type - Value supplied for `type`.
+ * @param _name - Value supplied for `_name`.
+ * @returns The result produced by `entityRow`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function entityRow(id: string, type: string, _name: string): ResolvedEntity {
   return { id, type };
 }
 
-/** Resolver that never matches — every alias becomes an entity-creation candidate. */
+/** Resolver that never matches — every alias becomes an entity-creation candidate.
+ *
+ * Inputs: None.
+ * @returns The result produced by `resolveNone`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 const resolveNone: ResolveEntityFn = async () => ({ kind: "none" });
 
-/** Resolver that confidently matches anything looking like "Acme" to a project entity. */
+/** Resolver that confidently matches anything looking like "Acme" to a project entity.
+ *
+ * @param _ownerOrgId - Value supplied for `_ownerOrgId`.
+ * @param name - Value supplied for `name`.
+ * @returns The result produced by `resolveAcmeProject`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 const resolveAcmeProject: ResolveEntityFn = async (_ownerOrgId, name) =>
   /acme/i.test(name)
     ? { kind: "match", entity: entityRow(ACME_ENTITY_ID, "project", "Acme") }
     : { kind: "none" };
 
+/**
+ * Lists no memberships.
+ *
+ * Inputs: None.
+ * @returns The result produced by `listNoMemberships`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 const listNoMemberships: ListMembershipsFn = async () => [];
 
+/**
+ * Creates deps.
+ *
+ * @param overrides - Value supplied for `overrides`.
+ * @returns The result produced by `makeDeps`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function makeDeps(overrides: Partial<ClassifierDeps> = {}): ClassifierDeps {
   return {
     generate: generateReturning(llmOutput()),

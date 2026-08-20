@@ -1,3 +1,13 @@
+/**
+ * Implements conflicts behavior for this TypeScript module.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import {
   type ClassifyPairsInput,
   type ConflictAnnotation,
@@ -37,6 +47,11 @@ export const DEFAULT_NEIGHBOR_LIMIT = 10;
  * constrained to the SAME owner_scope (owner_scope_type + owner_scope_id), with
  * at least one OVERLAPPING entity link, and status = 'active'. Splitting this
  * out keeps the scoping invariants testable in isolation from the fused query.
+ *
+ * @param candidate - Value supplied for `candidate`.
+ * @param limit - Value supplied for `limit`.
+ * @returns The result produced by `buildNeighborQueryFilters`.
+ * @throws Errors raised by validation or dependent operations.
  */
 export function buildNeighborQueryFilters(
   candidate: NeighborCandidate,
@@ -60,6 +75,13 @@ export interface ConflictDetectorDeps {
 }
 
 export interface ConflictDetector {
+  /**
+   * Executes classify pairs.
+   *
+   * @param input - Value supplied for `input`.
+   * @returns The result produced by `classifyPairs`.
+   * @throws Errors raised by validation or dependent operations.
+   */
   classifyPairs(input: ClassifyPairsInput): Promise<ConflictAnnotation[]>;
 }
 
@@ -79,6 +101,15 @@ export interface ConflictDetectorError extends Error {
   readonly attempts: number;
 }
 
+/**
+ * Creates conflict detector error.
+ *
+ * @param kind - Value supplied for `kind`.
+ * @param attempts - Value supplied for `attempts`.
+ * @param message - Value supplied for `message`.
+ * @returns The result produced by `createConflictDetectorError`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 export function createConflictDetectorError(
   kind: ConflictDetectorErrorKind,
   attempts: number,
@@ -87,6 +118,13 @@ export function createConflictDetectorError(
   return Object.assign(new Error(message), { kind, attempts } as const);
 }
 
+/**
+ * Determines whether conflict detector error.
+ *
+ * @param value - Value supplied for `value`.
+ * @returns The result produced by `isConflictDetectorError`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 export function isConflictDetectorError(value: unknown): value is ConflictDetectorError {
   return (
     value instanceof Error &&
@@ -96,7 +134,13 @@ export function isConflictDetectorError(value: unknown): value is ConflictDetect
   );
 }
 
-/** Parses + validates a raw model response; null on invalid JSON or shape. */
+/** Parses + validates a raw model response; null on invalid JSON or shape.
+ *
+ * @param raw - Value supplied for `raw`.
+ * @param allowedMemoryIds - Value supplied for `allowedMemoryIds`.
+ * @returns The result produced by `parseConflictOutput`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function parseConflictOutput(
   raw: string,
   allowedMemoryIds?: ReadonlySet<string>,
@@ -124,11 +168,22 @@ function parseConflictOutput(
  * once on invalid, and each classification is stamped with the candidate id to
  * form a ConflictAnnotation. Returns an empty array when there are no neighbors
  * (no LLM call).
+ *
+ * @param deps - Value supplied for `deps`.
+ * @returns The result produced by `createConflictDetector`.
+ * @throws Errors raised by validation or dependent operations.
  */
 export function createConflictDetector(deps: ConflictDetectorDeps): ConflictDetector {
   const { generate } = deps;
   conflictDetectorConfigSchema.parse(deps.config);
   return {
+    /**
+     * Executes classify pairs.
+     *
+     * @param rawInput - Value supplied for `rawInput`.
+     * @returns The result produced by `classifyPairs`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async classifyPairs(rawInput: ClassifyPairsInput): Promise<ConflictAnnotation[]> {
       const input = classifyPairsInputSchema.parse(rawInput);
       const { candidate, neighbors } = input;
@@ -180,6 +235,10 @@ export const SUPERSEDE_CONFIDENCE_THRESHOLD = 0.7;
  *     that disagree)
  *   - a `duplicates` → MERGE targeting the duplicate
  *   - nothing conflicting / only `coexists` / no neighbors → ADD (no target)
+ *
+ * @param annotations - Value supplied for `annotations`.
+ * @returns The result produced by `suggestOperation`.
+ * @throws Errors raised by validation or dependent operations.
  */
 export function suggestOperation(annotations: ConflictAnnotation[]): OperationSuggestion {
   const supersede = annotations.find(

@@ -1,3 +1,13 @@
+/**
+ * Tests policy matrix behavior.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import type { SourceTrustClass } from "@entellix/contracts";
 import { policyMatrixConfigSchema } from "@entellix/contracts/policy-matrix";
 import type { PolicyMatrixConfig } from "@entellix/contracts/policy-matrix";
@@ -32,7 +42,12 @@ import {
  * builder below should be swapped to the imported enriched-candidate type.
  */
 
-/** Build a hard-rule-free classification matching a given tuple, most fields defaulted. */
+/** Build a hard-rule-free classification matching a given tuple, most fields defaulted.
+ *
+ * @param overrides - Value supplied for `overrides`.
+ * @returns The result produced by `classification`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function classification(overrides: Partial<EvaluatedClassification> = {}): EvaluatedClassification {
   return {
     candidateId: "00000000-0000-4000-8000-000000000001",

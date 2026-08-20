@@ -11,7 +11,7 @@
   "scripts": {
     "build": "turbo run build --concurrency=1",
     "changeset": "changeset",
-    "check": "turbo run typecheck test:unit && oxlint && oxfmt --check",
+    "check": "turbo run typecheck test:unit && pnpm tsdoc:check && oxlint && oxfmt --check",
     "check:all": "pnpm check && pnpm release:documentation:verify && pnpm release:topology:verify && pnpm release:packages:verify && pnpm release:standalone:verify && pnpm release:security && pnpm release:secrets && pnpm release:preflight",
     "dev": "pnpm --filter @entellix/standalone dev",
     "format": "oxfmt",
@@ -32,17 +32,18 @@
     "standalone:migrate": "pnpm --filter @entellix/standalone migrate",
     "test": "pnpm test:unit",
     "test:unit": "turbo run test:unit",
-    "typecheck": "turbo run typecheck"
+    "typecheck": "turbo run typecheck",
+    "tsdoc:check": "node --test scripts/tsdoc-compliance.test.mjs && node scripts/verify-tsdoc-compliance.mjs"
   },
   "devDependencies": {
-    "@changesets/cli": "2.29.7",
-    "oxfmt": "0.56.0",
-    "oxlint": "1.71.0",
-    "turbo": "2.10.0",
+    "@changesets/cli": "3.0.1",
+    "oxfmt": "0.64.0",
+    "oxlint": "1.79.0",
+    "turbo": "2.10.11",
     "typescript": "catalog:"
   },
   "engines": {
     "node": ">=24"
   },
-  "packageManager": "pnpm@11.9.0"
+  "packageManager": "pnpm@11.22.0"
 }

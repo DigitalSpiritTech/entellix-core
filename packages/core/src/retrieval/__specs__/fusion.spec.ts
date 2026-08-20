@@ -1,3 +1,13 @@
+/**
+ * Tests fusion behavior.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import type { MemoryStatus, MemoryType, RenderPolicy } from "@entellix/contracts";
 import { describe, expect, it, vi } from "vitest";
 
@@ -58,15 +68,37 @@ import {
 const NOW = new Date("2026-07-07T00:00:00.000Z");
 const DAY = 24 * 60 * 60 * 1000;
 
+/**
+ * Executes days ago.
+ *
+ * @param days - Value supplied for `days`.
+ * @returns The result produced by `daysAgo`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function daysAgo(days: number): Date {
   return new Date(NOW.getTime() - days * DAY);
 }
 
+/**
+ * Executes days ahead.
+ *
+ * @param days - Value supplied for `days`.
+ * @returns The result produced by `daysAhead`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function daysAhead(days: number): Date {
   return new Date(NOW.getTime() + days * DAY);
 }
 
 // Active, currently-valid, unboosted memory. Override per test.
+/**
+ * Executes mem.
+ *
+ * @param id - Value supplied for `id`.
+ * @param overrides - Value supplied for `overrides`.
+ * @returns The result produced by `mem`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function mem(id: string, overrides: Partial<FusionMemory> = {}): FusionMemory {
   return {
     id,
@@ -83,12 +115,40 @@ function mem(id: string, overrides: Partial<FusionMemory> = {}): FusionMemory {
   };
 }
 
+/**
+ * Executes allow.
+ *
+ * Inputs: None.
+ * @returns The result produced by `allow`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 const allow: MemoryAcl = () => true;
+/**
+ * Executes deny b.
+ *
+ * @param id - Value supplied for `id`.
+ * @returns The result produced by `denyB`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 const denyB: MemoryAcl = (id) => id !== "b";
+/**
+ * Executes ids.
+ *
+ * @param candidates - Value supplied for `candidates`.
+ * @returns The result produced by `ids`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 const ids = (candidates: readonly FusedCandidate[]): string[] => candidates.map((c) => c.id);
 
 // Deterministic PRNG (mulberry32) so adversarial ACL fixtures are reproducible
 // and contain no wall-clock / Math.random nondeterminism.
+/**
+ * Executes mulberry32.
+ *
+ * @param seed - Value supplied for `seed`.
+ * @returns The result produced by `mulberry32`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function mulberry32(seed: number): () => number {
   let state = seed >>> 0;
   return () => {
@@ -306,6 +366,13 @@ describe("ACL is a hard filter, never a score input (adversarial property test)"
         ...allowedIds.map((id) => mem(id)),
       ];
 
+      /**
+       * Executes acl.
+       *
+       * @param id - Value supplied for `id`.
+       * @returns The result produced by `acl`.
+       * @throws Errors raised by validation or dependent operations.
+       */
       const acl: MemoryAcl = (id) => id !== forbiddenId;
 
       const out = fuseAndRank({
@@ -338,6 +405,13 @@ describe("ACL is a hard filter, never a score input (adversarial property test)"
         ranked.toReversed().map((id, i) => ({ id, rank: i + 1 })),
       ];
       const memories = universe.map((id) => mem(id, { updatedAt: NOW }));
+      /**
+       * Executes acl.
+       *
+       * @param id - Value supplied for `id`.
+       * @returns The result produced by `acl`.
+       * @throws Errors raised by validation or dependent operations.
+       */
       const acl: MemoryAcl = (id) => !forbidden.has(id);
 
       const out = fuseAndRank({

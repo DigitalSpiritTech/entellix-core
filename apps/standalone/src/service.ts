@@ -1,3 +1,13 @@
+/**
+ * Implements service behavior for this TypeScript module.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import {
   LOG_CONTEXT_ACK_MESSAGE,
   type GetContextInput,
@@ -37,22 +47,107 @@ export interface StandaloneServiceOptions {
   rawRetentionDays: number;
   repository: StandaloneRepository;
   embeddingProvider?: EmbeddingProvider;
+  /**
+   * Executes now.
+   *
+   * Inputs: None.
+   * @returns The result produced by `now`.
+   * @throws Errors raised by validation or dependent operations.
+   */
   now?: () => Date;
 }
 
 export interface StandaloneService {
+  /**
+   * Executes log context.
+   *
+   * @param input - Value supplied for `input`.
+   * @returns The result produced by `logContext`.
+   * @throws Errors raised by validation or dependent operations.
+   */
   logContext(input: LogContextInput): Promise<LogContextOutput>;
+  /**
+   * Saves memory.
+   *
+   * @param input - Value supplied for `input`.
+   * @returns The result produced by `saveMemory`.
+   * @throws Errors raised by validation or dependent operations.
+   */
   saveMemory(input: SaveMemoryInput): Promise<LogContextOutput>;
+  /**
+   * Gets context.
+   *
+   * @param input - Value supplied for `input`.
+   * @returns The result produced by `getContext`.
+   * @throws Errors raised by validation or dependent operations.
+   */
   getContext(input: GetContextInput): Promise<GetContextOutput>;
+  /**
+   * Executes retrieve memories.
+   *
+   * @param input - Value supplied for `input`.
+   * @returns The result produced by `retrieveMemories`.
+   * @throws Errors raised by validation or dependent operations.
+   */
   retrieveMemories(input: RetrieveMemoryInput): Promise<RetrieveMemoryOutput>;
+  /**
+   * Lists memories.
+   *
+   * @param input - Value supplied for `input`.
+   * @returns The result produced by `listMemories`.
+   * @throws Errors raised by validation or dependent operations.
+   */
   listMemories(input: ListMemoriesInput): Promise<ListMemoriesOutput>;
+  /**
+   * Lists reviews.
+   *
+   * Inputs: None.
+   * @returns The result produced by `listReviews`.
+   * @throws Errors raised by validation or dependent operations.
+   */
   listReviews(): ReturnType<StandaloneRepository["listReviewQueue"]>;
+  /**
+   * Decides review.
+   *
+   * @param input - Value supplied for `input`.
+   * @returns The result produced by `decideReview`.
+   * @throws Errors raised by validation or dependent operations.
+   */
   decideReview(input: ReviewDecisionInput): ReturnType<StandaloneRepository["decideReview"]>;
+  /**
+   * Runs retention.
+   *
+   * Inputs: None.
+   * @returns The result produced by `runRetention`.
+   * @throws Errors raised by validation or dependent operations.
+   */
   runRetention(): Promise<RetentionResult>;
+  /**
+   * Executes export workspace.
+   *
+   * Inputs: None.
+   * @returns The result produced by `exportWorkspace`.
+   * @throws Errors raised by validation or dependent operations.
+   */
   exportWorkspace(): Promise<StandaloneExport>;
+  /**
+   * Executes delete workspace.
+   *
+   * Inputs: None.
+   * @returns The result produced by `deleteWorkspace`.
+   * @throws Errors raised by validation or dependent operations.
+   */
   deleteWorkspace(): Promise<DeleteResult>;
 }
 
+/**
+ * Converts to contract memory.
+ *
+ * @param memory - Value supplied for `memory`.
+ * @param workspaceId - Value supplied for `workspaceId`.
+ * @returns The result produced by `toContractMemory`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function toContractMemory(memory: StandaloneMemory, workspaceId: string): Memory {
   return {
     id: memory.id,
@@ -67,6 +162,14 @@ function toContractMemory(memory: StandaloneMemory, workspaceId: string): Memory
   };
 }
 
+/**
+ * Queries embedding.
+ *
+ * @param provider - Value supplied for `provider`.
+ * @param query - Value supplied for `query`.
+ * @returns The result produced by `queryEmbedding`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 async function queryEmbedding(
   provider: EmbeddingProvider | undefined,
   query: string,
@@ -74,14 +177,36 @@ async function queryEmbedding(
   return provider?.embedQuery(query).catch(() => undefined);
 }
 
+/**
+ * Creates standalone service.
+ *
+ * @param options - Value supplied for `options`.
+ * @returns The result produced by `createStandaloneService`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 export function createStandaloneService(options: StandaloneServiceOptions): StandaloneService {
   const now = options.now ?? (() => new Date());
   const { repository, workspaceId, actorUserId } = options;
 
+  /**
+   * Executes retrieve.
+   *
+   * @param query - Value supplied for `query`.
+   * @param limit - Value supplied for `limit`.
+   * @returns The result produced by `retrieve`.
+   * @throws Errors raised by validation or dependent operations.
+   */
   const retrieve = async (query: string, limit: number) =>
     repository.searchMemories(query, limit, await queryEmbedding(options.embeddingProvider, query));
 
   return {
+    /**
+     * Executes log context.
+     *
+     * @param rawInput - Value supplied for `rawInput`.
+     * @returns The result produced by `logContext`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async logContext(rawInput) {
       const input = logContextInputSchema.parse(rawInput);
       const receipt = await repository.recordEvent({
@@ -99,6 +224,13 @@ export function createStandaloneService(options: StandaloneServiceOptions): Stan
         message: LOG_CONTEXT_ACK_MESSAGE,
       };
     },
+    /**
+     * Saves memory.
+     *
+     * @param rawInput - Value supplied for `rawInput`.
+     * @returns The result produced by `saveMemory`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async saveMemory(rawInput) {
       const input = saveMemoryInputSchema.parse(rawInput);
       const receipt = await repository.recordEvent({
@@ -114,6 +246,13 @@ export function createStandaloneService(options: StandaloneServiceOptions): Stan
         message: LOG_CONTEXT_ACK_MESSAGE,
       };
     },
+    /**
+     * Gets context.
+     *
+     * @param rawInput - Value supplied for `rawInput`.
+     * @returns The result produced by `getContext`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async getContext(rawInput) {
       const input = getContextInputSchema.parse(rawInput);
       const [relevant, current] = await Promise.all([
@@ -146,6 +285,13 @@ export function createStandaloneService(options: StandaloneServiceOptions): Stan
           activeEntityIds: [],
           channel: "packet",
         },
+        /**
+         * Executes conflict check.
+         *
+         * Inputs: None.
+         * @returns The result produced by `conflictCheck`.
+         * @throws Errors raised by validation or dependent operations.
+         */
         conflictCheck: () => false,
       });
       const directiveIds = new Set(directives.map((memory) => memory.id));
@@ -193,6 +339,13 @@ export function createStandaloneService(options: StandaloneServiceOptions): Stan
         envelope: { actorUserId, orgId: workspaceId, entityIds: [], verified: true },
       };
     },
+    /**
+     * Executes retrieve memories.
+     *
+     * @param rawInput - Value supplied for `rawInput`.
+     * @returns The result produced by `retrieveMemories`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async retrieveMemories(rawInput) {
       const input = retrieveMemoryInputSchema.parse(rawInput);
       const rows =
@@ -205,6 +358,13 @@ export function createStandaloneService(options: StandaloneServiceOptions): Stan
             );
       return { memories: rows.map((memory) => toContractMemory(memory, workspaceId)) };
     },
+    /**
+     * Lists memories.
+     *
+     * @param rawInput - Value supplied for `rawInput`.
+     * @returns The result produced by `listMemories`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async listMemories(rawInput) {
       const input = listMemoriesInputSchema.parse(rawInput);
       const rows = (await repository.listMemories(input.limit)).filter(
@@ -212,14 +372,49 @@ export function createStandaloneService(options: StandaloneServiceOptions): Stan
       );
       return { memories: rows.map((memory) => toContractMemory(memory, workspaceId)) };
     },
+    /**
+     * Lists reviews.
+     *
+     * Inputs: None.
+     * @returns The result produced by `listReviews`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     listReviews: () => repository.listReviewQueue(),
+    /**
+     * Decides review.
+     *
+     * @param input - Value supplied for `input`.
+     * @returns The result produced by `decideReview`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     decideReview: (input) => repository.decideReview(input, now()),
+    /**
+     * Runs retention.
+     *
+     * Inputs: None.
+     * @returns The result produced by `runRetention`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     runRetention() {
       const current = now();
       const cutoff = new Date(current.getTime() - options.rawRetentionDays * 24 * 60 * 60 * 1_000);
       return repository.runRetention(cutoff, current);
     },
+    /**
+     * Executes export workspace.
+     *
+     * Inputs: None.
+     * @returns The result produced by `exportWorkspace`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     exportWorkspace: () => repository.exportWorkspace(workspaceId, now()),
+    /**
+     * Executes delete workspace.
+     *
+     * Inputs: None.
+     * @returns The result produced by `deleteWorkspace`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     deleteWorkspace: () => repository.deleteWorkspace(),
   };
 }

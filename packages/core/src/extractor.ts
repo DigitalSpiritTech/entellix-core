@@ -1,3 +1,13 @@
+/**
+ * Implements extractor behavior for this TypeScript module.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import {
   type ExtractedCandidate,
   type ExtractFromBatchInput,
@@ -40,11 +50,25 @@ export interface ExtractorDeps {
 }
 
 export interface Extractor {
+  /**
+   * Executes extract from batch.
+   *
+   * @param input - Value supplied for `input`.
+   * @returns The result produced by `extractFromBatch`.
+   * @throws Errors raised by validation or dependent operations.
+   */
   extractFromBatch(input: ExtractFromBatchInput): Promise<ExtractionResult>;
 }
 
 /** Effect-native extractor surface used by functional orchestration. */
 export interface EffectExtractor {
+  /**
+   * Executes extract from batch.
+   *
+   * @param input - Value supplied for `input`.
+   * @returns The result produced by `extractFromBatch`.
+   * @throws Errors raised by validation or dependent operations.
+   */
   extractFromBatch(input: ExtractFromBatchInput): Effect.Effect<ExtractionResult, ExtractorError>;
 }
 
@@ -66,6 +90,15 @@ export interface ExtractorError extends Error {
   readonly attempts: number;
 }
 
+/**
+ * Creates extractor error.
+ *
+ * @param kind - Value supplied for `kind`.
+ * @param attempts - Value supplied for `attempts`.
+ * @param message - Value supplied for `message`.
+ * @returns The result produced by `createExtractorError`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 export function createExtractorError(
   kind: ExtractorErrorKind,
   attempts: number,
@@ -74,6 +107,13 @@ export function createExtractorError(
   return Object.assign(new Error(message), { kind, attempts } as const);
 }
 
+/**
+ * Determines whether extractor error.
+ *
+ * @param value - Value supplied for `value`.
+ * @returns The result produced by `isExtractorError`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 export function isExtractorError(value: unknown): value is ExtractorError {
   return (
     value instanceof Error &&
@@ -85,6 +125,10 @@ export function isExtractorError(value: unknown): value is ExtractorError {
  * Parses a raw model response into validated candidates. Returns null on any
  * failure — invalid JSON or a shape that fails `extractionOutputSchema` — so the
  * caller can decide whether to retry.
+ *
+ * @param raw - Value supplied for `raw`.
+ * @returns The result produced by `parseCandidates`.
+ * @throws Errors raised by validation or dependent operations.
  */
 function parseCandidates(raw: string): ExtractedCandidate[] | null {
   let json: unknown;
@@ -101,19 +145,46 @@ function parseCandidates(raw: string): ExtractedCandidate[] | null {
  * Directive candidates are stored verbatim (Decision 10): the extractor refuses
  * any paraphrase in `candidateText` and normalizes it to the (verbatim) evidence
  * span. Non-directive candidates pass through unchanged.
+ *
+ * @param candidate - Value supplied for `candidate`.
+ * @returns The result produced by `enforceDirectiveVerbatim`.
+ * @throws Errors raised by validation or dependent operations.
  */
 function enforceDirectiveVerbatim(candidate: ExtractedCandidate): ExtractedCandidate {
   if (candidate.provisionalType !== "directive") return candidate;
   return { ...candidate, candidateText: candidate.evidenceSpan };
 }
 
+/**
+ * Executes extraction attempt.
+ *
+ * @param generate - Value supplied for `generate`.
+ * @param prompt - Value supplied for `prompt`.
+ * @param attempt - Value supplied for `attempt`.
+ * @returns The result produced by `extractionAttempt`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function extractionAttempt(
   generate: ExtractorGenerateFn,
   prompt: string,
   attempt: number,
 ): Effect.Effect<ExtractedCandidate[], ExtractorError> {
   return Effect.tryPromise({
+    /**
+     * Executes try.
+     *
+     * Inputs: None.
+     * @returns The result produced by `try`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     try: () => generate(prompt),
+    /**
+     * Executes catch.
+     *
+     * @param cause - Value supplied for `cause`.
+     * @returns The result produced by `catch`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     catch: (cause) =>
       createExtractorError(
         "generation_failed",
@@ -139,12 +210,23 @@ function extractionAttempt(
 /**
  * Effect-native extractor composition. Zod owns input/output contracts; Effect
  * owns asynchronous generation and the typed failure channel.
+ *
+ * @param deps - Value supplied for `deps`.
+ * @returns The result produced by `createExtractorEffect`.
+ * @throws Errors raised by validation or dependent operations.
  */
 export function createExtractorEffect(deps: ExtractorDeps): EffectExtractor {
   const { generate } = deps;
   const config = extractorConfigSchema.parse(deps.config);
 
   return {
+    /**
+     * Executes extract from batch.
+     *
+     * @param input - Value supplied for `input`.
+     * @returns The result produced by `extractFromBatch`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     extractFromBatch(
       input: ExtractFromBatchInput,
     ): Effect.Effect<ExtractionResult, ExtractorError> {
@@ -184,10 +266,22 @@ export function createExtractorEffect(deps: ExtractorDeps): EffectExtractor {
   };
 }
 
-/** Promise adapter retained for the existing SaaS composition root. */
+/** Promise adapter retained for the existing SaaS composition root.
+ *
+ * @param deps - Value supplied for `deps`.
+ * @returns The result produced by `createExtractor`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 export function createExtractor(deps: ExtractorDeps): Extractor {
   const extractor = createExtractorEffect(deps);
   return {
+    /**
+     * Executes extract from batch.
+     *
+     * @param input - Value supplied for `input`.
+     * @returns The result produced by `extractFromBatch`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async extractFromBatch(input: ExtractFromBatchInput): Promise<ExtractionResult> {
       const outcome = await Effect.runPromise(Effect.either(extractor.extractFromBatch(input)));
       if (Either.isLeft(outcome)) throw outcome.left;

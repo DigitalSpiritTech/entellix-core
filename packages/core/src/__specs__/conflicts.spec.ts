@@ -1,3 +1,13 @@
+/**
+ * Tests conflicts behavior.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import {
   CONFLICT_PROMPT_VERSION,
   CONFLICT_RATIONALE_MAX_LENGTH,
@@ -49,6 +59,13 @@ const FOREIGN_MEMORY_ID = "00000000-0000-4000-8000-0000000000cf";
 const OWNER_USER_ID = "00000000-0000-4000-8000-0000000000d0";
 const ACME_ENTITY_ID = "00000000-0000-4000-8000-0000000000e0";
 
+/**
+ * Executes neighbor.
+ *
+ * @param overrides - Value supplied for `overrides`.
+ * @returns The result produced by `neighbor`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function neighbor(overrides: Partial<Neighbor> & Pick<Neighbor, "memoryId" | "content">): Neighbor {
   return {
     memoryType: "fact",
@@ -60,11 +77,23 @@ function neighbor(overrides: Partial<Neighbor> & Pick<Neighbor, "memoryId" | "co
   };
 }
 
-/** Serialize a classifier response the way a well-behaved model would return it. */
+/** Serialize a classifier response the way a well-behaved model would return it.
+ *
+ * @param annotations - Value supplied for `annotations`.
+ * @returns The result produced by `modelOutput`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function modelOutput(annotations: unknown[]): string {
   return JSON.stringify({ annotations });
 }
 
+/**
+ * Executes annotation.
+ *
+ * @param overrides - Value supplied for `overrides`.
+ * @returns The result produced by `annotation`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function annotation(overrides: Partial<ConflictAnnotation> = {}): ConflictAnnotation {
   return {
     candidateId: CANDIDATE_ID,

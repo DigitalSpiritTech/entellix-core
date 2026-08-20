@@ -1,3 +1,13 @@
+/**
+ * Implements repository memory behavior for this TypeScript module.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import { createHash, randomUUID } from "node:crypto";
 
 import type { MemoryCandidate } from "@entellix/contracts/candidates";
@@ -17,8 +27,22 @@ import {
 } from "./contracts.ts";
 import type { StandaloneRepository } from "./repository.ts";
 
+/**
+ * Converts to error message.
+ *
+ * @param error - Value supplied for `error`.
+ * @returns The result produced by `toErrorMessage`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 const toErrorMessage = (error: unknown) => (error instanceof Error ? error.message : String(error));
 
+/**
+ * Executes event key.
+ *
+ * @param input - Value supplied for `input`.
+ * @returns The result produced by `eventKey`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function eventKey(input: RecordStandaloneEventInput): string {
   return createHash("sha256")
     .update(
@@ -27,7 +51,21 @@ function eventKey(input: RecordStandaloneEventInput): string {
     .digest("hex");
 }
 
+/**
+ * Creates in memory standalone repository.
+ *
+ * Inputs: None.
+ * @returns The result produced by `createInMemoryStandaloneRepository`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 export function createInMemoryStandaloneRepository(): StandaloneRepository & {
+  /**
+   * Executes snapshot.
+   *
+   * Inputs: None.
+   * @returns The result produced by `snapshot`.
+   * @throws Errors raised by validation or dependent operations.
+   */
   snapshot(): {
     events: StandaloneEvent[];
     candidates: MemoryCandidate[];
@@ -42,6 +80,13 @@ export function createInMemoryStandaloneRepository(): StandaloneRepository & {
   const reviews: Array<Record<string, unknown>> = [];
 
   const repository: StandaloneRepository = {
+    /**
+     * Executes record event.
+     *
+     * @param rawInput - Value supplied for `rawInput`.
+     * @returns The result produced by `recordEvent`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async recordEvent(rawInput) {
       const input = recordStandaloneEventInputSchema.parse(rawInput);
       const key = eventKey(input);
@@ -64,6 +109,13 @@ export function createInMemoryStandaloneRepository(): StandaloneRepository & {
       keys.set(key, event.id);
       return { eventId: event.id, deduped: false };
     },
+    /**
+     * Executes claim next event.
+     *
+     * Inputs: None.
+     * @returns The result produced by `claimNextEvent`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async claimNextEvent() {
       const event = events.find((item) => item.status === "queued" || item.status === "failed");
       if (!event) return null;
@@ -72,6 +124,13 @@ export function createInMemoryStandaloneRepository(): StandaloneRepository & {
       event.updatedAt = new Date();
       return { ...event };
     },
+    /**
+     * Executes complete event.
+     *
+     * @param eventId - Value supplied for `eventId`.
+     * @returns The result produced by `completeEvent`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async completeEvent(eventId) {
       const event = events.find((item) => item.id === eventId);
       if (!event) throw new Error(`event '${eventId}' not found`);
@@ -79,6 +138,14 @@ export function createInMemoryStandaloneRepository(): StandaloneRepository & {
       event.error = null;
       event.updatedAt = new Date();
     },
+    /**
+     * Executes fail event.
+     *
+     * @param eventId - Value supplied for `eventId`.
+     * @param error - Value supplied for `error`.
+     * @returns The result produced by `failEvent`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async failEvent(eventId, error) {
       const event = events.find((item) => item.id === eventId);
       if (!event) throw new Error(`event '${eventId}' not found`);
@@ -86,36 +153,65 @@ export function createInMemoryStandaloneRepository(): StandaloneRepository & {
       event.error = toErrorMessage(error);
       event.updatedAt = new Date();
     },
+    /**
+     * Executes persist candidates.
+     *
+     * @param event - Value supplied for `event`.
+     * @param extraction - Value supplied for `extraction`.
+     * @param actorUserId - Value supplied for `actorUserId`.
+     * @param workspaceId - Value supplied for `workspaceId`.
+     * @returns The result produced by `persistCandidates`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async persistCandidates(event, extraction, actorUserId, workspaceId) {
-      const created = extraction.candidates.map(
-        (candidate): MemoryCandidate => ({
-          id: randomUUID(),
-          batchId: event.id,
-          sourceEventIds: [event.id],
-          actorUserId,
-          activeOrgId: workspaceId,
-          candidateText: candidate.candidateText,
-          provisionalType: candidate.provisionalType,
-          evidenceSpan: candidate.evidenceSpan,
-          reasonSummary: candidate.reasonSummary,
-          status: "pending_classification",
-          extractorVersion: extraction.promptVersion,
-          model: extraction.model,
-          createdAt: new Date().toISOString(),
-        }),
-      );
+      const created = extraction.candidates.map((candidate): MemoryCandidate => ({
+        id: randomUUID(),
+        batchId: event.id,
+        sourceEventIds: [event.id],
+        actorUserId,
+        activeOrgId: workspaceId,
+        candidateText: candidate.candidateText,
+        provisionalType: candidate.provisionalType,
+        evidenceSpan: candidate.evidenceSpan,
+        reasonSummary: candidate.reasonSummary,
+        status: "pending_classification",
+        extractorVersion: extraction.promptVersion,
+        model: extraction.model,
+        createdAt: new Date().toISOString(),
+      }));
       candidates.push(...created);
       return created;
     },
+    /**
+     * Executes persist candidate decision.
+     *
+     * @param input - Value supplied for `input`.
+     * @returns The result produced by `persistCandidateDecision`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async persistCandidateDecision(input) {
       const candidate = candidates.find((item) => item.id === input.candidateId);
       if (!candidate) throw new Error(`candidate '${input.candidateId}' not found`);
       candidate.status = input.status;
       governance.set(candidate.id, input.governance);
     },
+    /**
+     * Finds neighbors.
+     *
+     * Inputs: None.
+     * @returns The result produced by `findNeighbors`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async findNeighbors() {
       return [];
     },
+    /**
+     * Executes commit candidate.
+     *
+     * @param rawInput - Value supplied for `rawInput`.
+     * @returns The result produced by `commitCandidate`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async commitCandidate(rawInput) {
       const input: CommitCandidateInput = rawInput;
       const candidate = candidates.find((item) => item.id === input.candidate.id);
@@ -167,6 +263,14 @@ export function createInMemoryStandaloneRepository(): StandaloneRepository & {
       candidate.status = "committed";
       return memory;
     },
+    /**
+     * Executes search memories.
+     *
+     * @param query - Value supplied for `query`.
+     * @param limit - Value supplied for `limit`.
+     * @returns The result produced by `searchMemories`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async searchMemories(query, limit) {
       const words = query.toLowerCase().split(/\W+/).filter(Boolean);
       return memories
@@ -180,9 +284,23 @@ export function createInMemoryStandaloneRepository(): StandaloneRepository & {
         .slice(0, limit)
         .map((item) => item.memory);
     },
+    /**
+     * Lists memories.
+     *
+     * @param limit - Value supplied for `limit`.
+     * @returns The result produced by `listMemories`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async listMemories(limit) {
       return memories.filter((memory) => memory.status === "active").slice(0, limit);
     },
+    /**
+     * Lists review queue.
+     *
+     * Inputs: None.
+     * @returns The result produced by `listReviewQueue`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async listReviewQueue() {
       return candidates
         .filter((candidate) => candidate.status === "review")
@@ -209,6 +327,14 @@ export function createInMemoryStandaloneRepository(): StandaloneRepository & {
           };
         });
     },
+    /**
+     * Decides review.
+     *
+     * @param input - Value supplied for `input`.
+     * @param now - Value supplied for `now`.
+     * @returns The result produced by `decideReview`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async decideReview(input, now) {
       const candidate = candidates.find((item) => item.id === input.candidateId);
       const state = governance.get(input.candidateId);
@@ -270,6 +396,14 @@ export function createInMemoryStandaloneRepository(): StandaloneRepository & {
         reconcileOutcome: { operation, memoryId: memory?.id ?? null },
       } satisfies ReviewDecisionResult;
     },
+    /**
+     * Runs retention.
+     *
+     * @param cutoff - Value supplied for `cutoff`.
+     * @param now - Value supplied for `now`.
+     * @returns The result produced by `runRetention`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async runRetention(cutoff, now) {
       let eventsRedacted = 0;
       for (const event of events) {
@@ -298,6 +432,14 @@ export function createInMemoryStandaloneRepository(): StandaloneRepository & {
       }
       return { eventsRedacted, candidatesRedacted, memoriesExpired };
     },
+    /**
+     * Executes export workspace.
+     *
+     * @param workspaceId - Value supplied for `workspaceId`.
+     * @param now - Value supplied for `now`.
+     * @returns The result produced by `exportWorkspace`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async exportWorkspace(workspaceId, now) {
       return standaloneExportSchema.parse({
         format: "entellix-standalone-export/v1",
@@ -320,6 +462,13 @@ export function createInMemoryStandaloneRepository(): StandaloneRepository & {
         reviews,
       });
     },
+    /**
+     * Executes delete workspace.
+     *
+     * Inputs: None.
+     * @returns The result produced by `deleteWorkspace`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async deleteWorkspace() {
       const result = {
         reviews: reviews.length,
@@ -335,11 +484,32 @@ export function createInMemoryStandaloneRepository(): StandaloneRepository & {
       keys.clear();
       return result;
     },
+    /**
+     * Executes ping.
+     *
+     * Inputs: None.
+     * @returns The result produced by `ping`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async ping() {},
+    /**
+     * Executes close.
+     *
+     * Inputs: None.
+     * @returns The result produced by `close`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async close() {},
   };
 
   return Object.assign(repository, {
+    /**
+     * Executes snapshot.
+     *
+     * Inputs: None.
+     * @returns The result produced by `snapshot`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     snapshot: () => ({
       events: structuredClone(events),
       candidates: structuredClone(candidates),

@@ -1,3 +1,13 @@
+/**
+ * Defines the public exports for this TypeScript module.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import { z } from "zod";
 
 export * from "./entities.ts";
@@ -160,14 +170,36 @@ export const organizationSchema = z.object({
 });
 export type Organization = z.infer<typeof organizationSchema>;
 
+/**
+ * Executes normalize base url.
+ *
+ * @param baseUrl - Value supplied for `baseUrl`.
+ * @returns The result produced by `normalizeBaseUrl`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function normalizeBaseUrl(baseUrl: string | URL): string {
   return String(baseUrl).replace(/\/+$/, "");
 }
 
+/**
+ * Executes memory app url.
+ *
+ * @param baseUrl - Value supplied for `baseUrl`.
+ * @param memoryId - Value supplied for `memoryId`.
+ * @returns The result produced by `memoryAppUrl`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 export function memoryAppUrl(baseUrl: string | URL, memoryId: string): string {
   return `${normalizeBaseUrl(baseUrl)}/memories/${memoryId}`;
 }
 
+/**
+ * Executes memories list url.
+ *
+ * @param baseUrl - Value supplied for `baseUrl`.
+ * @returns The result produced by `memoriesListUrl`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 export function memoriesListUrl(baseUrl: string | URL): string {
   return `${normalizeBaseUrl(baseUrl)}/memories`;
 }

@@ -1,3 +1,13 @@
+/**
+ * Implements worker behavior for this TypeScript module.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 /* oxlint-disable no-await-in-loop */
 import type { PolicyMatrixConfig } from "@entellix/contracts/policy-matrix";
 import type { Classifier } from "@entellix/core/classifier";
@@ -30,21 +40,63 @@ export interface StandaloneWorkerDeps {
   conflictDetector: Pick<ConflictDetector, "classifyPairs">;
   matrix: PolicyMatrixConfig;
   embeddingProvider?: EmbeddingProvider;
+  /**
+   * Executes now.
+   *
+   * Inputs: None.
+   * @returns The result produced by `now`.
+   * @throws Errors raised by validation or dependent operations.
+   */
   now?: () => Date;
 }
 
 export interface StandaloneWorker {
+  /**
+   * Runs once effect.
+   *
+   * Inputs: None.
+   * @returns The result produced by `runOnceEffect`.
+   * @throws Errors raised by validation or dependent operations.
+   */
   runOnceEffect(): Effect.Effect<WorkerRunResult, never>;
+  /**
+   * Runs once.
+   *
+   * Inputs: None.
+   * @returns The result produced by `runOnce`.
+   * @throws Errors raised by validation or dependent operations.
+   */
   runOnce(): Promise<WorkerRunResult>;
 }
 
+/**
+ * Executes empty run result.
+ *
+ * @param claimed - Value supplied for `claimed`.
+ * @returns The result produced by `emptyRunResult`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function emptyRunResult(claimed: 0 | 1): WorkerRunResult {
   return { claimed, committed: 0, review: 0, rejected: 0, failed: 0 };
 }
 
+/**
+ * Creates standalone worker.
+ *
+ * @param deps - Value supplied for `deps`.
+ * @returns The result produced by `createStandaloneWorker`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 export function createStandaloneWorker(deps: StandaloneWorkerDeps): StandaloneWorker {
   const now = deps.now ?? (() => new Date());
 
+  /**
+   * Runs once effect.
+   *
+   * Inputs: None.
+   * @returns The result produced by `runOnceEffect`.
+   * @throws Errors raised by validation or dependent operations.
+   */
   const runOnceEffect = (): Effect.Effect<WorkerRunResult, never> =>
     Effect.gen(function* () {
       const event = yield* Effect.promise(() => deps.repository.claimNextEvent());
@@ -53,6 +105,13 @@ export function createStandaloneWorker(deps: StandaloneWorkerDeps): StandaloneWo
       const result = emptyRunResult(1);
       const outcome = yield* Effect.either(
         Effect.tryPromise({
+          /**
+           * Executes try.
+           *
+           * Inputs: None.
+           * @returns The result produced by `try`.
+           * @throws Errors raised by validation or dependent operations.
+           */
           try: async () => {
             const extraction = await deps.extractor.extractFromBatch({
               batchId: event.id,
@@ -155,6 +214,13 @@ export function createStandaloneWorker(deps: StandaloneWorkerDeps): StandaloneWo
 
             await deps.repository.completeEvent(event.id);
           },
+          /**
+           * Executes catch.
+           *
+           * @param error - Value supplied for `error`.
+           * @returns The result produced by `catch`.
+           * @throws Errors raised by validation or dependent operations.
+           */
           catch: (error) => error,
         }),
       );
@@ -168,6 +234,13 @@ export function createStandaloneWorker(deps: StandaloneWorkerDeps): StandaloneWo
 
   return {
     runOnceEffect,
+    /**
+     * Runs once.
+     *
+     * Inputs: None.
+     * @returns The result produced by `runOnce`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     runOnce: () => Effect.runPromise(runOnceEffect()),
   };
 }
@@ -175,25 +248,74 @@ export function createStandaloneWorker(deps: StandaloneWorkerDeps): StandaloneWo
 export interface WorkerLoopOptions {
   intervalMs: number;
   batchSize: number;
+  /**
+   * Runs once.
+   *
+   * Inputs: None.
+   * @returns The result produced by `runOnce`.
+   * @throws Errors raised by validation or dependent operations.
+   */
   runOnce: () => Promise<WorkerRunResult>;
+  /**
+   * Runs retention.
+   *
+   * Inputs: None.
+   * @returns The result produced by `runRetention`.
+   * @throws Errors raised by validation or dependent operations.
+   */
   runRetention: () => Promise<unknown>;
+  /**
+   * Executes on error.
+   *
+   * @param error - Value supplied for `error`.
+   * @returns Nothing.
+   * @throws Errors raised by validation or dependent operations.
+   */
   onError?: (error: unknown) => void;
 }
 
 export interface WorkerLoop {
+  /**
+   * Executes stop.
+   *
+   * Inputs: None.
+   * @returns Nothing.
+   * @throws Errors raised by validation or dependent operations.
+   */
   stop(): void;
 }
 
+/**
+ * Executes start worker loop.
+ *
+ * @param options - Value supplied for `options`.
+ * @returns The result produced by `startWorkerLoop`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 export function startWorkerLoop(options: WorkerLoopOptions): WorkerLoop {
   let stopped = false;
   let timer: NodeJS.Timeout | undefined;
 
+  /**
+   * Executes schedule.
+   *
+   * Inputs: None.
+   * @returns The result produced by `schedule`.
+   * @throws Errors raised by validation or dependent operations.
+   */
   const schedule = () => {
     if (stopped) return;
     timer = setTimeout(run, options.intervalMs);
     timer.unref();
   };
 
+  /**
+   * Executes run.
+   *
+   * Inputs: None.
+   * @returns The result produced by `run`.
+   * @throws Errors raised by validation or dependent operations.
+   */
   const run = async () => {
     try {
       for (let index = 0; index < options.batchSize; index += 1) {
@@ -210,6 +332,13 @@ export function startWorkerLoop(options: WorkerLoopOptions): WorkerLoop {
 
   void run();
   return {
+    /**
+     * Executes stop.
+     *
+     * Inputs: None.
+     * @returns The result produced by `stop`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     stop() {
       stopped = true;
       if (timer) clearTimeout(timer);

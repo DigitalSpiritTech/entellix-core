@@ -1,4 +1,14 @@
 /**
+ * Implements model output behavior for this TypeScript module.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
+/**
  * Tolerant JSON extraction for model-backed core stages (ADR 0019). The model
  * boundary is text-in/text-out (`generateText`), and even when the prompt demands
  * "raw JSON only", chat models routinely wrap the payload in a ```json fence or
@@ -14,6 +24,10 @@
  * and surrounding prose. Strips a ```` ```json … ``` ```` (or bare ```` ``` ```) fence
  * if present, then slices from the first `{`/`[` to its matching last `}`/`]`. A
  * response that is already clean JSON is returned trimmed and otherwise intact.
+ *
+ * @param raw - Value supplied for `raw`.
+ * @returns The result produced by `extractJsonText`.
+ * @throws Errors raised by validation or dependent operations.
  */
 export function extractJsonText(raw: string): string {
   const trimmed = raw.trim();

@@ -1,3 +1,13 @@
+/**
+ * Implements policy matrix behavior for this TypeScript module.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import type { SourceTrustClass } from "@entellix/contracts";
 import type {
   Disposition,
@@ -85,12 +95,22 @@ export const HARD_RULES = {
   /** directive from a non-first-party trust class → review (Decision 10). */
   nonFirstPartyDirective: "non_first_party_directive",
 } as const;
-/** The hard-rule floor: raises `auto_commit` to `review`, passes review/reject through. */
+/** The hard-rule floor: raises `auto_commit` to `review`, passes review/reject through.
+ *
+ * @param matrixDisposition - Value supplied for `matrixDisposition`.
+ * @returns The result produced by `applyHardRuleFloor`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function applyHardRuleFloor(matrixDisposition: Disposition): Disposition {
   return matrixDisposition === "auto_commit" ? "review" : matrixDisposition;
 }
 
-/** `type/audience/authority/sensitivity` tuple string for a readable decision reason. */
+/** `type/audience/authority/sensitivity` tuple string for a readable decision reason.
+ *
+ * @param cell - Value supplied for `cell`.
+ * @returns The result produced by `cellTuple`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function cellTuple(cell: PolicyMatrixCell): string {
   return `${cell.memoryType}/${cell.audienceKind ?? "*"}/${cell.sourceAuthority ?? "*"}/${cell.sensitivityLevel ?? "*"}`;
 }
@@ -101,6 +121,11 @@ function cellTuple(cell: PolicyMatrixCell): string {
  * proposal → non-first-party directive), or null when none applies. Enforced in
  * CODE, above the matrix, so no cell — however permissive — can bypass it
  * (Decisions 10, 18).
+ *
+ * @param classification - Value supplied for `classification`.
+ * @param sourceTrustClass - Value supplied for `sourceTrustClass`.
+ * @returns The result produced by `detectHardRule`.
+ * @throws Errors raised by validation or dependent operations.
  */
 function detectHardRule(
   classification: EvaluatedClassification,
@@ -125,6 +150,11 @@ function detectHardRule(
  * The most-specific matrix cell matching a tuple AT/ABOVE its confidence
  * threshold, or null when none does. Specificity = count of non-null (non-
  * wildcard) axes; ties resolve to the earlier cell in array order (strict `>`).
+ *
+ * @param matrix - Value supplied for `matrix`.
+ * @param classification - Value supplied for `classification`.
+ * @returns The result produced by `matchCell`.
+ * @throws Errors raised by validation or dependent operations.
  */
 function matchCell(
   matrix: PolicyMatrixConfig,
@@ -162,6 +192,10 @@ function matchCell(
  *      be `auto_commit` (capped to at least `review`); a stricter matrix `reject`
  *      is preserved. Stamp `hardRule` with the firing rule id.
  *   3. Always stamp `matrixVersion = matrix.version`.
+ *
+ * @param rawInput - Value supplied for `rawInput`.
+ * @returns The result produced by `evaluateDisposition`.
+ * @throws Errors raised by validation or dependent operations.
  */
 export function evaluateDisposition(rawInput: EvaluateDispositionInput): DispositionDecision {
   const { classification, sourceTrustClass, matrix } =
@@ -191,7 +225,12 @@ export function evaluateDisposition(rawInput: EvaluateDispositionInput): Disposi
   });
 }
 
-/** A fresh zeroed disposition tally — never shared between the active/draft counts. */
+/** A fresh zeroed disposition tally — never shared between the active/draft counts.
+ *
+ * Inputs: None.
+ * @returns The result produced by `emptyDispositionCounts`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function emptyDispositionCounts(): Record<Disposition, number> {
   return { auto_commit: 0, review: 0, reject: 0 };
 }
@@ -199,6 +238,10 @@ function emptyDispositionCounts(): Record<Disposition, number> {
 /**
  * Replay N candidates against a draft matrix and diff dispositions vs the active
  * matrix, BEFORE activating (PRD §10 simulation mode). PURE — no persistence.
+ *
+ * @param rawInput - Value supplied for `rawInput`.
+ * @returns The result produced by `simulateMatrix`.
+ * @throws Errors raised by validation or dependent operations.
  */
 export function simulateMatrix(rawInput: SimulateMatrixInput): SimulationDiff {
   const { candidates, activeMatrix, draftMatrix } = simulateMatrixInputSchema.parse(rawInput);

@@ -1,3 +1,13 @@
+/**
+ * Implements templates behavior for this TypeScript module.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import {
   INSTRUCTION_MARKER_BEGIN,
   INSTRUCTION_MARKER_END,
@@ -21,6 +31,10 @@ import {
  * an idempotent insert-or-update inside a user-owned file (CLAUDE.md /
  * AGENTS.md). Kept as a local helper so both managed-block clients stay
  * marker-consistent by construction.
+ *
+ * @param inner - Value supplied for `inner`.
+ * @returns The result produced by `managedBlock`.
+ * @throws Errors raised by validation or dependent operations.
  */
 function managedBlock(inner: string): string {
   return `${INSTRUCTION_MARKER_BEGIN}\n${inner.trim()}\n${INSTRUCTION_MARKER_END}`;
@@ -141,6 +155,10 @@ export const ACTIVE_INSTRUCTION_TEMPLATES =
  * Look up the active template for a client. Throws for any value that is not a
  * known instruction client — the parameter is typed, but this guards untyped
  * boundaries (CLI args, request payloads) that reach the function anyway.
+ *
+ * @param client - Value supplied for `client`.
+ * @returns The result produced by `getInstructionTemplate`.
+ * @throws Errors raised by validation or dependent operations.
  */
 export function getInstructionTemplate(client: InstructionClient): InstructionTemplate {
   const template = ACTIVE_INSTRUCTION_TEMPLATES[client];

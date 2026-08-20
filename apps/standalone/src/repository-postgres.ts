@@ -1,3 +1,13 @@
+/**
+ * Implements repository postgres behavior for this TypeScript module.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 /* oxlint-disable no-await-in-loop */
 import { createHash, randomUUID } from "node:crypto";
 
@@ -115,6 +125,13 @@ const memoryRowSchema = z.object({
 
 type QueryClient = Sql | TransactionSql;
 
+/**
+ * Executes event key.
+ *
+ * @param input - Value supplied for `input`.
+ * @returns The result produced by `eventKey`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function eventKey(input: RecordStandaloneEventInput): string {
   return createHash("sha256")
     .update(
@@ -123,6 +140,13 @@ function eventKey(input: RecordStandaloneEventInput): string {
     .digest("hex");
 }
 
+/**
+ * Converts to standalone event.
+ *
+ * @param row - Value supplied for `row`.
+ * @returns The result produced by `toStandaloneEvent`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function toStandaloneEvent(row: unknown): StandaloneEvent {
   const value = eventRowSchema.parse(row);
   return standaloneEventSchema.parse({
@@ -139,6 +163,13 @@ function toStandaloneEvent(row: unknown): StandaloneEvent {
   });
 }
 
+/**
+ * Converts to standalone memory.
+ *
+ * @param row - Value supplied for `row`.
+ * @returns The result produced by `toStandaloneMemory`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function toStandaloneMemory(row: unknown): StandaloneMemory {
   const value = memoryRowSchema.parse(row);
   return standaloneMemorySchema.parse({
@@ -163,6 +194,15 @@ function toStandaloneMemory(row: unknown): StandaloneMemory {
   });
 }
 
+/**
+ * Converts to candidate.
+ *
+ * @param row - Value supplied for `row`.
+ * @param actorUserId - Value supplied for `actorUserId`.
+ * @param workspaceId - Value supplied for `workspaceId`.
+ * @returns The result produced by `toCandidate`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function toCandidate(row: unknown, actorUserId: string, workspaceId: string): MemoryCandidate {
   const value = candidateRowSchema.parse(row);
   return {
@@ -182,6 +222,14 @@ function toCandidate(row: unknown, actorUserId: string, workspaceId: string): Me
   };
 }
 
+/**
+ * Executes cosine.
+ *
+ * @param left - Value supplied for `left`.
+ * @param right - Value supplied for `right`.
+ * @returns The result produced by `cosine`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function cosine(left: number[] | null, right: number[] | undefined): number {
   if (!left || !right || left.length !== right.length || left.length === 0) return 0;
   let dot = 0;
@@ -198,6 +246,14 @@ function cosine(left: number[] | null, right: number[] | undefined): number {
   return denominator === 0 ? 0 : dot / denominator;
 }
 
+/**
+ * Executes commit with client.
+ *
+ * @param sql - Value supplied for `sql`.
+ * @param input - Value supplied for `input`.
+ * @returns The result produced by `commitWithClient`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 async function commitWithClient(
   sql: QueryClient,
   input: CommitCandidateInput,
@@ -265,6 +321,13 @@ async function commitWithClient(
   return toStandaloneMemory(row);
 }
 
+/**
+ * Creates postgres standalone repository.
+ *
+ * @param rawOptions - Value supplied for `rawOptions`.
+ * @returns The result produced by `createPostgresStandaloneRepository`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 export function createPostgresStandaloneRepository(
   rawOptions: z.input<typeof postgresRepositoryOptionsSchema>,
 ): StandaloneRepository {
@@ -272,6 +335,13 @@ export function createPostgresStandaloneRepository(
   const sql = postgres(options.databaseUrl, { max: 10 });
 
   return {
+    /**
+     * Executes record event.
+     *
+     * @param rawInput - Value supplied for `rawInput`.
+     * @returns The result produced by `recordEvent`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async recordEvent(rawInput) {
       const input = recordStandaloneEventInputSchema.parse(rawInput);
       const id = randomUUID();
@@ -290,6 +360,13 @@ export function createPostgresStandaloneRepository(
       const [existing] = await sql`SELECT id FROM memory_events WHERE idempotency_key = ${key}`;
       return eventReceiptSchema.parse({ eventId: existing?.id, deduped: true });
     },
+    /**
+     * Executes claim next event.
+     *
+     * Inputs: None.
+     * @returns The result produced by `claimNextEvent`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async claimNextEvent() {
       return sql.begin(async (tx) => {
         const [row] = await tx`
@@ -309,12 +386,27 @@ export function createPostgresStandaloneRepository(
         return toStandaloneEvent(claimed);
       });
     },
+    /**
+     * Executes complete event.
+     *
+     * @param eventId - Value supplied for `eventId`.
+     * @returns The result produced by `completeEvent`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async completeEvent(eventId) {
       await sql`
         UPDATE memory_events SET status = 'completed', error = NULL, updated_at = now()
         WHERE id = ${eventId}
       `;
     },
+    /**
+     * Executes fail event.
+     *
+     * @param eventId - Value supplied for `eventId`.
+     * @param error - Value supplied for `error`.
+     * @returns The result produced by `failEvent`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async failEvent(eventId, error) {
       const message = error instanceof Error ? error.message : String(error);
       await sql`
@@ -322,6 +414,16 @@ export function createPostgresStandaloneRepository(
         WHERE id = ${eventId}
       `;
     },
+    /**
+     * Executes persist candidates.
+     *
+     * @param event - Value supplied for `event`.
+     * @param extraction - Value supplied for `extraction`.
+     * @param actorUserId - Value supplied for `actorUserId`.
+     * @param workspaceId - Value supplied for `workspaceId`.
+     * @returns The result produced by `persistCandidates`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async persistCandidates(event, extraction, actorUserId, workspaceId) {
       const result: MemoryCandidate[] = [];
       for (const [index, candidate] of extraction.candidates.entries()) {
@@ -343,6 +445,13 @@ export function createPostgresStandaloneRepository(
       }
       return result;
     },
+    /**
+     * Executes persist candidate decision.
+     *
+     * @param input - Value supplied for `input`.
+     * @returns The result produced by `persistCandidateDecision`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async persistCandidateDecision(input) {
       await sql`
         UPDATE memory_candidates
@@ -352,6 +461,14 @@ export function createPostgresStandaloneRepository(
         WHERE id = ${input.candidateId}
       `;
     },
+    /**
+     * Finds neighbors.
+     *
+     * @param candidate - Value supplied for `candidate`.
+     * @param governance - Value supplied for `governance`.
+     * @returns The result produced by `findNeighbors`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async findNeighbors(candidate, governance) {
       const entityIds = governance.classification.entityLinks.map((link) => link.entityId);
       if (entityIds.length === 0) return [];
@@ -380,9 +497,25 @@ export function createPostgresStandaloneRepository(
         };
       });
     },
+    /**
+     * Executes commit candidate.
+     *
+     * @param input - Value supplied for `input`.
+     * @returns The result produced by `commitCandidate`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async commitCandidate(input) {
       return sql.begin((tx) => commitWithClient(tx, input));
     },
+    /**
+     * Executes search memories.
+     *
+     * @param query - Value supplied for `query`.
+     * @param limit - Value supplied for `limit`.
+     * @param queryEmbedding - Value supplied for `queryEmbedding`.
+     * @returns The result produced by `searchMemories`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async searchMemories(query, limit, queryEmbedding) {
       const rows = await sql`
         SELECT *, ts_rank_cd(to_tsvector('english', text), plainto_tsquery('english', ${query})) AS lexical_score
@@ -403,12 +536,26 @@ export function createPostgresStandaloneRepository(
         .slice(0, limit)
         .map((item) => item.memory);
     },
+    /**
+     * Lists memories.
+     *
+     * @param limit - Value supplied for `limit`.
+     * @returns The result produced by `listMemories`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async listMemories(limit) {
       const rows = await sql`
         SELECT * FROM memories WHERE status = 'active' ORDER BY updated_at DESC LIMIT ${limit}
       `;
       return rows.map(toStandaloneMemory);
     },
+    /**
+     * Lists review queue.
+     *
+     * Inputs: None.
+     * @returns The result produced by `listReviewQueue`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async listReviewQueue() {
       const rows = await sql`
         SELECT * FROM memory_candidates WHERE status = 'review' ORDER BY created_at LIMIT 100
@@ -439,6 +586,14 @@ export function createPostgresStandaloneRepository(
         };
       });
     },
+    /**
+     * Decides review.
+     *
+     * @param rawInput - Value supplied for `rawInput`.
+     * @param now - Value supplied for `now`.
+     * @returns The result produced by `decideReview`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async decideReview(rawInput, now) {
       const input = reviewDecisionInputSchema.parse(rawInput);
       return sql.begin(async (tx): Promise<ReviewDecisionResult> => {
@@ -515,6 +670,14 @@ export function createPostgresStandaloneRepository(
         };
       });
     },
+    /**
+     * Runs retention.
+     *
+     * @param cutoff - Value supplied for `cutoff`.
+     * @param now - Value supplied for `now`.
+     * @returns The result produced by `runRetention`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async runRetention(cutoff, now) {
       const events = await sql`
         UPDATE memory_events
@@ -541,6 +704,14 @@ export function createPostgresStandaloneRepository(
         memoriesExpired: memories.length,
       };
     },
+    /**
+     * Executes export workspace.
+     *
+     * @param workspaceId - Value supplied for `workspaceId`.
+     * @param now - Value supplied for `now`.
+     * @returns The result produced by `exportWorkspace`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async exportWorkspace(workspaceId, now) {
       const [memoryRows, eventRows, candidates, reviews] = await Promise.all([
         sql`SELECT * FROM memories ORDER BY created_at`,
@@ -593,6 +764,13 @@ export function createPostgresStandaloneRepository(
         reviews,
       });
     },
+    /**
+     * Executes delete workspace.
+     *
+     * Inputs: None.
+     * @returns The result produced by `deleteWorkspace`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async deleteWorkspace() {
       return sql.begin(async (tx) => {
         const [reviewCount, memoryCount, candidateCount, eventCount] = await Promise.all([
@@ -613,9 +791,23 @@ export function createPostgresStandaloneRepository(
         };
       });
     },
+    /**
+     * Executes ping.
+     *
+     * Inputs: None.
+     * @returns The result produced by `ping`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async ping() {
       await sql`SELECT 1`;
     },
+    /**
+     * Executes close.
+     *
+     * Inputs: None.
+     * @returns The result produced by `close`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     close: () => sql.end(),
   };
 }

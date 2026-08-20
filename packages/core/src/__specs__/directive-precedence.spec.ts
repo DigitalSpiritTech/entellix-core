@@ -1,3 +1,13 @@
+/**
+ * Tests directive precedence behavior.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import {
   SPECIFICITY_RANKS,
   type PrecedenceContext,
@@ -55,6 +65,13 @@ const ACME_TASK_ID = "00000000-0000-4000-8000-0000000000a4";
 const ACTOR_USER_ID = "00000000-0000-4000-8000-0000000000b1";
 const ORG_ID = "00000000-0000-4000-8000-0000000000c1";
 
+/**
+ * Executes directive.
+ *
+ * @param overrides - Value supplied for `overrides`.
+ * @returns The result produced by `directive`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function directive(
   overrides: Partial<PrecedenceDirective> & Pick<PrecedenceDirective, "memoryId">,
 ): PrecedenceDirective {
@@ -103,6 +120,13 @@ const acmeContext: EntityContext = {
   ancestorsById: { [ACME_PROJECT_ID]: [ACME_CLIENT_ID] },
 };
 
+/**
+ * Executes context.
+ *
+ * @param overrides - Value supplied for `overrides`.
+ * @returns The result produced by `context`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function context(overrides: Partial<PrecedenceContext> = {}): PrecedenceContext {
   return {
     actorUserId: ACTOR_USER_ID,
@@ -113,9 +137,22 @@ function context(overrides: Partial<PrecedenceContext> = {}): PrecedenceContext 
   };
 }
 
+/**
+ * Executes pair key.
+ *
+ * @param a - Value supplied for `a`.
+ * @param b - Value supplied for `b`.
+ * @returns The result produced by `pairKey`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 const pairKey = (a: string, b: string): string => [a, b].toSorted().join("|");
 
-/** Deterministic semantic conflict check over an explicit set of id pairs. */
+/** Deterministic semantic conflict check over an explicit set of id pairs.
+ *
+ * @param pairs - Value supplied for `pairs`.
+ * @returns The result produced by `conflictOn`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function conflictOn(pairs: Array<[string, string]>): ConflictCheck {
   const set = new Set(pairs.map(([a, b]) => pairKey(a, b)));
   return (a, b) => set.has(pairKey(a.memoryId, b.memoryId));
@@ -124,6 +161,14 @@ function conflictOn(pairs: Array<[string, string]>): ConflictCheck {
 const RATIFIED_OVERRIDE_ANNOTATION =
   "Project Acme requires Next.js — overrides the org rule for this project";
 
+/**
+ * Executes active by id.
+ *
+ * @param resolution - Value supplied for `resolution`.
+ * @param memoryId - Value supplied for `memoryId`.
+ * @returns The result produced by `activeById`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function activeById(resolution: ReturnType<typeof resolveDirectives>, memoryId: string) {
   return resolution.active.find((entry) => entry.memoryId === memoryId);
 }
