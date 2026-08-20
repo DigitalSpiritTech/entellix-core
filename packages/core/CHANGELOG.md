@@ -1,5 +1,18 @@
 # @entellix/core
 
+## 0.1.2
+
+### Patch Changes
+
+- 29eb888: Constrain classifier entity suggestions to the public registry vocabulary so valid memories do not fail processing on invented entity types.
+- 29eb888: Add executable package quickstarts and checked public-export inventories, and
+  ship an archive-first standalone guide with an idempotent migration command and
+  clean-room PostgreSQL/MCP verification. Add a non-root Docker image and an
+  isolated PostgreSQL 16 Compose quickstart for one-command local evaluation.
+- Updated dependencies [29eb888]
+- Updated dependencies [29eb888]
+  - @entellix/contracts@0.1.2
+
 ## 0.1.1
 
 ### Patch Changes

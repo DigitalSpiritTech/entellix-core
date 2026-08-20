@@ -1,6 +1,6 @@
 {
   "name": "@entellix/instructions",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Versioned MCP guidance and client instruction templates for Entellix.",
   "license": "Apache-2.0",
   "repository": {
