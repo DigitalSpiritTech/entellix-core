@@ -88,8 +88,8 @@ export function isReconcilerError(value: unknown): value is ReconcilerError {
  * Verbatim carve-out guard (Decision 10, PRD §9). For directive/policy content
  * the stored bytes MUST equal the source bytes — no canonicalization,
  * summarization, or merge may touch them. This guard is LIVE (not a stub): it
- * throws the moment stored content drifts from the original, so the byte-equality
- * property test has something real to exercise even before reconcile() lands.
+ * throws the moment stored content drifts from the original, protecting the
+ * transactional commit boundary and its byte-equality property tests.
  *
  * @param original - Value supplied for `original`.
  * @param stored - Value supplied for `stored`.

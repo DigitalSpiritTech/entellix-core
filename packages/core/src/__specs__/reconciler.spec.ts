@@ -25,12 +25,7 @@ import {
  * Unit surface for S2.2.4 — the reconciler's PURE parts (no Postgres, no HTTP,
  * no model). Exercises canonicalization, the type→policy derivation, operation
  * selection from conflict annotations, and the verbatim byte-equality carve-out.
- * RED phase: canonicalizeContent / deriveRowPolicies / selectOperation throw
- * 'not implemented: S2.2.4' — these assertions define the developer's target.
- *
- * Two things are LIVE now and pass green (documented in the directive):
- *   - TYPE_DERIVED_POLICIES (a contract constant) — its shape/values are checked.
- *   - assertDirectiveByteEquality — the verbatim guard throws on drift already.
+ * The assertions pin the implemented pure rules and typed guard failures.
  */
 
 const A_UUID = "00000000-0000-4000-8000-0000000000f1";
@@ -92,7 +87,7 @@ describe("TYPE_DERIVED_POLICIES — type-derived render/verbatim/ttl (Decision 1
 });
 
 // ---------------------------------------------------------------------------
-// canonicalizeContent — non-verbatim normalization (RED: throws not-implemented)
+// canonicalizeContent — non-verbatim normalization.
 // ---------------------------------------------------------------------------
 
 describe("canonicalizeContent — non-verbatim normalization", () => {

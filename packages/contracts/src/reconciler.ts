@@ -108,11 +108,9 @@ export const TYPE_DERIVED_POLICIES: Record<MemoryType, TypeDerivedPolicy> = {
 };
 
 /**
- * A conflict annotation as consumed by the reconciler. This is a minimal local
- * shape; the authoritative producer is the conflict-detection contract
- * (`@entellix/contracts/conflicts`, S2.2.3, authored concurrently). TODO-SWAP:
- * re-export / align with that module's annotation type once it lands so a single
- * definition governs `relation`.
+ * Conflict projection consumed at the reconcile boundary. Hosts map persisted
+ * conflict annotations into this narrower operation-oriented shape; `memoryId`
+ * names the target and `materiallyDifferent` distinguishes MERGE from NOOP.
  */
 export const RECONCILE_CONFLICT_RELATIONS = [
   "supersedes",
@@ -157,10 +155,9 @@ export type ReconcileDisposition = z.infer<typeof reconcileDispositionSchema>;
 /**
  * The enriched, governed candidate the reconciler commits. Carries the full v2
  * axis set (owner/audience/type/sensitivity) resolved by the classifier suite
- * plus provenance. This is a minimal local shape; the authoritative enriched
- * candidate is produced by `@entellix/contracts/classification` (S2.2.1,
- * authored concurrently). TODO-SWAP: align with that module's EnrichedCandidate
- * once it lands.
+ * plus persistence and provenance fields required by the transactional writer.
+ * This commit-boundary projection is intentionally narrower than classifier
+ * output and richer in host-owned identifiers.
  */
 export const reconcileCandidateSchema = z.object({
   /** The persisted memory_candidates row to flip to `committed` (when present). */

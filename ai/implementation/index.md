@@ -56,6 +56,9 @@ retrieval during the same run. Never print or record provider credentials.
 The `0.1.0` packages established npm trusted publishing and provenance. The
 `0.1.1` topology made standalone artifact production a continuation of that same
 workflow and added GitHub artifact attestation and release-asset verification.
+The `0.1.2` release completed the public-beta readiness plan. Its durable
+registry, attestation, clean-room, and CI evidence is recorded in
+[`public-beta-0.1.2.md`](public-beta-0.1.2.md).
 
 Add a Changeset for public behavior, merge through a pull request, then merge
 the Changesets-generated version pull request. Publishing uses npm trusted

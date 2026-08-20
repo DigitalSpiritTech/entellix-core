@@ -33,10 +33,9 @@ import {
  * suggester, the pure neighbor-scope filter builder, and the pair classifier
  * with a FAKE generate() (the raw LLM call is injected) and hand-built neighbor
  * rows, so these must NOT touch Postgres, Supabase, an HTTP server, or a real
- * model (see ai/testing.md). RED phase: the stubs throw 'not implemented:
- * S2.2.3' — these assertions define the developer's target.
+ * model. These assertions pin the implemented provider-neutral behavior.
  *
- * Pinned shape (developer implements to satisfy these):
+ * Pinned shape:
  *   createConflictDetector({ generate, config }) -> { classifyPairs({ candidate, neighbors }) }
  *     - parses generate() output with conflictClassificationOutputSchema
  *     - retries generate() exactly once on invalid output, else throws a typed error

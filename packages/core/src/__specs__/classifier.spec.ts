@@ -32,11 +32,10 @@ import {
  * Unit surface for S2.2.1 — the classifier suite. Exercises the classifier
  * factory in isolation with FAKE dependencies (generate(), resolveEntityFn,
  * listMembershipsFn all injected) and hand-built candidate rows, so these must
- * NOT touch Postgres, Supabase, an HTTP server, or a real model (ai/testing.md).
- * RED phase: createClassifier().classifyCandidate throws 'not implemented:
- * S2.2.1' — these assertions define the developer's target.
+ * NOT touch Postgres, an HTTP server, or a real model. These assertions pin the
+ * implemented provider-neutral behavior.
  *
- * Pinned behaviors the developer implements to satisfy these:
+ * Pinned behaviors:
  *   createClassifier({ generate, config, resolveEntityFn, listMembershipsFn })
  *     -> { classifyCandidate({ candidate, context, registryAliasHints? }) }
  *   - owner + scopeDistribution come from the model, NEVER from context.activeOrgId

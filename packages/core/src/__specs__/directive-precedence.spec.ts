@@ -28,7 +28,7 @@ import {
  * Unit surface for S2.3.3 — directive precedence + override annotations. Pure
  * resolver + renderer + pair-conflict primitive, exercised with hand-built
  * directives and an INJECTED deterministic conflict check (no LLM, no Postgres,
- * no HTTP — see ai/testing.md).
+ * no HTTP).
  *
  * The ratified case (Decision 11, executable) is encoded here directly from the
  * golden set: `directive/no-nextjs-org` (org-general "never Next.js") vs

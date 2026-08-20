@@ -24,22 +24,17 @@ import {
 
 /**
  * Unit surface for S2.2.2 — the confidence policy-matrix engine. Pure and
- * table-driven: no Postgres, Supabase, HTTP, or model (see ai/testing.md). RED
- * phase: `evaluateDisposition` / `simulateMatrix` throw 'not implemented: S2.2.2';
- * these assertions define the developer's target. The DEFAULT_POLICY_MATRIX shape
- * checks below exercise the (already-real) contract and will pass — everything
- * that calls the engine fails until the developer lands it.
+ * table-driven: no Postgres, HTTP, or model. The assertions pin the implemented
+ * lookup, hard-rule, and simulation behavior.
  *
- * Pinned behavior (developer implements to satisfy these):
+ * Pinned behavior:
  *   - matrix lookup = most-specific matching cell at/above minConfidence, else
  *     defaults (review); matrixVersion stamped on every decision.
  *   - hard rules run in CODE and are untunable-downward: a matrix cell can force
  *     review/reject but can NEVER escalate a hard-ruled tuple to auto_commit.
  *
- * NOTE(test-writer): @entellix/contracts/classification did not exist when these
- * tests were written, so `EvaluatedClassification` is the local structural shape
- * from policy-matrix.ts. When the sibling's classification contracts land, the
- * builder below should be swapped to the imported enriched-candidate type.
+ * `EvaluatedClassification` is intentionally the narrow policy-matrix input
+ * projection rather than the classifier's complete enriched-candidate shape.
  */
 
 /** Build a hard-rule-free classification matching a given tuple, most fields defaulted.

@@ -31,8 +31,8 @@ const isoDatetimeSchema = z.iso.datetime({ offset: true });
 /**
  * Candidate lifecycle. `pending_classification` is the birth state written by
  * the extractor; the classifier suite (S2.2.1) advances to `classified`; the
- * reconciler (S2.2.4) lands it on `committed`/`rejected`; the policy matrix can
- * route to `review`; stale candidates `expire`. Routing only — never a
+ * policy matrix can route it to `review` or `rejected`, and reconciliation
+ * advances successful writes to `committed`; stale candidates `expire`. Routing only — never a
  * terminal discard (Decision 1 mirrors the salience gate's no-drop rule).
  */
 export const CANDIDATE_STATUSES = [

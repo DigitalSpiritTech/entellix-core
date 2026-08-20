@@ -100,12 +100,9 @@ export const conflictAnnotationSchema = z.object({
 export type ConflictAnnotation = z.infer<typeof conflictAnnotationSchema>;
 
 /**
- * Reconciler operations a conflict analysis can SUGGEST. Deliberately a subset
- * of the reconciler's full vocab — conflict detection never emits SPLIT/EXPIRE.
- *
- * TODO(S2.2.4): swap for the reconciler's OPERATIONS vocab once
- * `@entellix/contracts/reconciler` exports it; kept local so conflict detection
- * typechecks independently of the sibling reconciler contract.
+ * Operations a conflict analysis can suggest. This is intentionally a
+ * conflict-specific vocabulary: it excludes write-only SPLIT/EXPIRE/UPDATE and
+ * includes REVIEW, which stops the candidate before reconciliation.
  */
 export const CONFLICT_OPERATIONS = ["ADD", "SUPERSEDE", "MERGE", "NOOP", "REVIEW"] as const;
 export const conflictOperationSchema = z.enum(CONFLICT_OPERATIONS);

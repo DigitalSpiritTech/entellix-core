@@ -29,11 +29,10 @@ import {
  * Unit surface for S2.1.3 — the multi-candidate extractor. Exercises the
  * extractor factory in isolation with a FAKE generate() (the raw LLM call is
  * injected) and hand-built event rows, so these must NOT touch Postgres,
- * Supabase, an HTTP server, or a real model (see ai/testing.md). RED phase:
- * createExtractor throws 'not implemented: S2.1.3' — these assertions define the
- * developer's target.
+ * an HTTP server, or a real model. These assertions pin the implemented
+ * provider-neutral behavior.
  *
- * Pinned shape (developer implements to satisfy these):
+ * Pinned shape:
  *   createExtractor({ generate, config }) -> { extractFromBatch({ batchId, events }) }
  *   - parses generate() output with extractionOutputSchema
  *   - retries generate() exactly once on invalid output, else throws a typed error

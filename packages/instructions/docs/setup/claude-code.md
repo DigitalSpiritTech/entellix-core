@@ -29,8 +29,8 @@ Entellix managed-block markers:
 <!-- entellix:end -->
 ```
 
-Keep the markers intact — the `entellix init` CLI (S4.1.2) finds them to update
-the block in place without disturbing the rest of the file.
+Keep the markers intact so Entellix-owned instructions remain distinguishable
+from the rest of the file and can be updated in place.
 
 ## 3. What to expect
 

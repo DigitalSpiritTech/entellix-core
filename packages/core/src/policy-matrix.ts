@@ -49,7 +49,7 @@ export type {
  * Behavior is pinned by pipeline/__specs__/policy-matrix.spec.ts (pure,
  * table-driven) and test/pipeline-policy-matrix.test.ts (persistence).
  *
- * ── Matrix change procedure (full runbook: docs/runbooks/policy-matrix-change.md) ─
+ * ── Matrix change procedure ─
  *   1. SIMULATE — run the host distribution's matrix simulation command over
  *      sampled candidates,
  *      diffing the draft matrix against the active one. Review every `changed`

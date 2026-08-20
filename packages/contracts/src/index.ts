@@ -120,9 +120,9 @@ export type RetrieveMemoryOutput = z.infer<typeof retrieveMemoryOutputSchema>;
 
 /**
  * v2 `search` intake tool (S1.2.3). A client-facing explicit-lookup surface that
- * delegates to v1-equivalent retrieval. `filters.scope`/`filters.status` are
- * accepted now but only wired through in a later sprint; Phase 1 honors `query`
- * and `limit` (the lexical/semantic retrieval path).
+ * delegates to the lexical/semantic retrieval path. The portable contract
+ * accepts scope and status filters; hosts document which filters their current
+ * repository adapter applies.
  */
 export const searchInputSchema = z.object({
   query: z.string().trim().min(1).max(500),
