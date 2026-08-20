@@ -6,7 +6,14 @@ import net from "node:net";
 import { tmpdir } from "node:os";
 import { basename, join, resolve } from "node:path";
 
-import { assertDisposableDatabaseUrl, parseMcpResponse } from "./standalone-smoke-lib.mjs";
+import {
+  assertDisposableDatabaseUrl,
+  buildStandaloneServerEnv,
+  findReviewCandidateByEventId,
+  isSuccessfulMcpToolCall,
+  parseMcpToolJson,
+  parseMcpResponse,
+} from "./standalone-smoke-lib.mjs";
 
 const optionValue = (name) => {
   const index = process.argv.indexOf(name);
@@ -122,6 +129,25 @@ const assertOperatorRoutes = async (baseUrl) => {
   const unauthenticated = await fetch(`${baseUrl}/operator/v1/reviews`);
   assert.equal(unauthenticated.status, 401);
 
+  const unauthenticatedMcp = await fetch(`${baseUrl}/api/mcp/entellix/mcp`, {
+    method: "POST",
+    headers: {
+      accept: "application/json, text/event-stream",
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      id: 1,
+      method: "initialize",
+      params: {
+        protocolVersion: "2025-11-25",
+        capabilities: {},
+        clientInfo: { name: "unauthenticated-smoke", version: "1.0.0" },
+      },
+    }),
+  });
+  assert.equal(unauthenticatedMcp.status, 401);
+
   const reviews = await authenticatedFetch(`${baseUrl}/operator/v1/reviews`);
   assert.equal(reviews.status, 200);
   assert.ok(Array.isArray(await reviews.json()));
@@ -140,24 +166,56 @@ const assertOperatorRoutes = async (baseUrl) => {
   assert.equal(unconfirmedDelete.status, 409);
 };
 
-const runProviderRoundTrip = async (client) => {
+const runProviderRoundTrip = async (client, baseUrl) => {
   const marker = `Entellix clean-room preference ${Date.now()}: always use UTC timestamps.`;
   const queued = await client.request("tools/call", {
     name: "save_memory",
     arguments: { text: marker, provenance: "explicit_request" },
   });
-  assert.equal(queued?.result?.isError, undefined);
+  assert.ok(isSuccessfulMcpToolCall(queued), "save_memory returned an MCP tool error");
+  const receipt = parseMcpToolJson(queued);
+  assert.equal(receipt.status, "queued");
+  assert.equal(typeof receipt.eventId, "string");
 
   const deadline = Date.now() + 90_000;
+  let reviewCandidate;
   while (Date.now() < deadline) {
+    const response = await authenticatedFetch(`${baseUrl}/operator/v1/reviews`);
+    assert.equal(response.status, 200);
+    const reviews = await response.json();
+    assert.ok(Array.isArray(reviews));
+    reviewCandidate = findReviewCandidateByEventId(reviews, receipt.eventId);
+    if (reviewCandidate) break;
+    await delay(2_000);
+  }
+  assert.ok(reviewCandidate, "provider-backed memory did not reach review within 90 seconds");
+
+  const approved = await authenticatedFetch(`${baseUrl}/operator/v1/reviews/decision`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      candidateId: reviewCandidate.candidateId,
+      action: "approve",
+      note: "Approved by the provider-backed clean-room release gate.",
+    }),
+  });
+  assert.equal(approved.status, 200);
+  const approvalResult = await approved.json();
+  const memoryId = approvalResult?.reconcileOutcome?.memoryId;
+  assert.equal(typeof memoryId, "string");
+
+  const retrievalDeadline = Date.now() + 30_000;
+  while (Date.now() < retrievalDeadline) {
     const listed = await client.request("tools/call", {
       name: "list_memories",
       arguments: { limit: 100 },
     });
-    if (JSON.stringify(listed).includes(marker)) return;
+    assert.ok(isSuccessfulMcpToolCall(listed), "list_memories returned an MCP tool error");
+    const inventory = parseMcpToolJson(listed);
+    if (inventory.memories?.some((memory) => memory.id === memoryId)) return;
     await delay(2_000);
   }
-  throw new Error("provider-backed memory did not become retrievable within 90 seconds");
+  throw new Error("approved provider-backed memory did not become retrievable within 30 seconds");
 };
 
 try {
@@ -211,7 +269,7 @@ try {
 
   child = spawn("node", ["--env-file=.env", "server/index.mjs"], {
     cwd: distributionRoot,
-    env: { ...process.env, PORT: String(port) },
+    env: buildStandaloneServerEnv(process.env, localToken, port),
     stdio: ["ignore", "pipe", "pipe"],
   });
   const collect = (chunk) => {
@@ -236,8 +294,13 @@ try {
     "save_memory",
     "search",
   ]);
+  const context = await client.request("tools/call", {
+    name: "get_context",
+    arguments: { taskContext: "Credential-free authenticated MCP smoke test." },
+  });
+  assert.ok(isSuccessfulMcpToolCall(context), "get_context returned an MCP tool error");
 
-  if (providerRoundTrip) await runProviderRoundTrip(client);
+  if (providerRoundTrip) await runProviderRoundTrip(client, baseUrl);
 
   const confirmedDelete = await authenticatedFetch(`${baseUrl}/operator/v1/data`, {
     method: "DELETE",

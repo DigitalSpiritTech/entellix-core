@@ -1,4 +1,5 @@
 import type { MemoryCandidate } from "@entellix/contracts/candidates";
+import { ENTITY_TYPES } from "@entellix/contracts";
 
 /**
  * Provider-neutral classifier prompt — versioned CONFIG, not code.
@@ -28,6 +29,9 @@ const AUDIENCE_KIND_LIST =
 /** The reconciler operation verbs the model may guess. Mirrors `OPERATION_GUESSES`. */
 const OPERATION_LIST = "ADD, UPDATE, SUPERSEDE, MERGE, SPLIT, EXPIRE, NOOP, REVIEW";
 
+/** The entity registry types the model may suggest. Mirrors `ENTITY_TYPES`. */
+const ENTITY_TYPE_LIST = ENTITY_TYPES.join(", ");
+
 const INSTRUCTIONS = `You classify one candidate memory along every governance axis for a memory engine.
 
 Scope is the engine's decision, never the host model's: the active org is context only — NEVER default the owner to it.
@@ -36,7 +40,7 @@ For the candidate below, return a classification with:
 - memoryType: one of ${MEMORY_TYPE_LIST}. Be conservative about "directive": only call something a directive when it is an explicit standing rule (markers like "from now on", "always", "never", "must").
 - owner: { value: "user" or "org", confidence: 0..1 } — binary owner with your confidence.
 - scopeDistribution: array of { owner, confidence }. Emit a single entry when confident; when the owner is ambiguous, emit BOTH "user" and "org" with confidences that roughly sum to 1 (a distribution, not a point guess).
-- entityMentions: array of { alias, suggestedType, role } for every entity the memory is about or mentions. Use the raw alias text; do NOT invent ids. suggestedType is one of the registry entity types; role is e.g. "subject", "mentions", "owner".
+- entityMentions: array of { alias, suggestedType, role } for every entity the memory is about or mentions. Use the raw alias text; do NOT invent ids. suggestedType must be one of ${ENTITY_TYPE_LIST}; do not use types outside this list. role is e.g. "subject", "mentions", "owner".
 - audienceHint: one of ${AUDIENCE_KIND_LIST} — your best guess at who should see this.
 - sensitivity: { level: "normal" | "sensitive" | "secret", aboutAnotherPerson: boolean }.
 - operationGuess: one of ${OPERATION_LIST} — advisory; conflict detection and the policy matrix refine it.

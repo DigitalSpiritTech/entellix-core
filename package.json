@@ -18,7 +18,7 @@
     "format:check": "oxfmt --check",
     "lint": "oxlint",
     "release:packages:verify": "node scripts/verify-public-packages.mjs",
-    "release:documentation:verify": "node --test scripts/public-documentation.test.mjs scripts/standalone-compose.test.mjs scripts/standalone-smoke.test.mjs && node scripts/verify-public-documentation.mjs",
+    "release:documentation:verify": "node --test scripts/public-documentation.test.mjs scripts/public-governance.test.mjs scripts/standalone-compose.test.mjs scripts/standalone-smoke.test.mjs && node scripts/verify-public-documentation.mjs",
     "release:preflight": "node scripts/release-preflight.mjs",
     "release:publish": "pnpm release:preflight && pnpm release:packages:verify && changeset publish",
     "release:security": "pnpm audit --prod --audit-level=high",

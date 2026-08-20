@@ -215,7 +215,8 @@ Processing is asynchronous. In the connected client:
 
 For a release gate, repository maintainers run the clean-room smoke runner
 against the candidate archive with `--provider-round-trip`; it exercises the
-same authenticated MCP initialize, tool discovery, save, process, and list flow.
+same authenticated MCP initialize, tool discovery, save, process, review
+approval, and list flow.
 
 ## Optional embedding retrieval
 

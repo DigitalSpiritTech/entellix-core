@@ -1,0 +1,52 @@
+name: Bug report
+description: Report a reproducible defect in a public package or the standalone host.
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: Do not include secrets, customer data, or vulnerability details. Report security issues through the private advisory link.
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Affected surface
+      options:
+        - "@entellix/contracts"
+        - "@entellix/core"
+        - "@entellix/instructions"
+        - "@entellix/standalone"
+        - Release or CI
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      placeholder: "0.1.1 or a full commit SHA"
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Include the smallest safe commands or code needed to reproduce the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include operating system, Node.js, PostgreSQL, provider/model, and installation path when relevant.
+    validations:
+      required: true

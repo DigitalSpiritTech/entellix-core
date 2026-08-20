@@ -1,4 +1,5 @@
 import type { MemoryCandidate } from "@entellix/contracts/candidates";
+import { ENTITY_TYPES } from "@entellix/contracts";
 import {
   CLASSIFIER_PROMPT_VERSION,
   type ClassifierLlmOutput,
@@ -405,6 +406,7 @@ describe("classifyCandidate — prompt is versioned and evidence-driven", () => 
     expect(prompt).toContain("Acme");
     // The instruction asks for classification.
     expect(prompt.toLowerCase()).toMatch(/classif|memory type|owner/);
+    for (const entityType of ENTITY_TYPES) expect(prompt).toContain(entityType);
   });
 
   it("flows the config model + classifierVersion onto the result", async () => {

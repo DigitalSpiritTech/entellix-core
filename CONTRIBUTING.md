@@ -4,7 +4,7 @@ Entellix core packages and the standalone distribution are licensed under the
 Apache License 2.0. Contributions intentionally submitted for inclusion are
 licensed under Apache-2.0 as described by section 5 of the license.
 
-After that gate is resolved, contributions should:
+Contributions should:
 
 - start from an issue or focused proposal for non-trivial behavior changes;
 - preserve the public package dependency direction and standalone

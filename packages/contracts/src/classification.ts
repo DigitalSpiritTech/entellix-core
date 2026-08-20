@@ -39,7 +39,7 @@ import {
  */
 
 /** Classifier prompt id, versioned CONFIG (not code) so a prompt change is auditable. */
-export const CLASSIFIER_PROMPT_VERSION = "classifier/2026-07-06";
+export const CLASSIFIER_PROMPT_VERSION = "classifier/2026-08-19";
 
 /** Cap on the short human-readable `basis` string explaining an audience choice. */
 export const AUDIENCE_BASIS_MAX_LENGTH = 280;

@@ -27,6 +27,9 @@ export const mastra = new Mastra({
     apiRoutes: standaloneRoutes,
     middleware: [
       {
+        // This route is the standalone MCP authentication boundary. Mastra's
+        // MCP 2.0 tool context does not retain the raw HTTP authorization
+        // header, so individual tools must rely on this verified gateway.
         path: `/api/mcp/${STANDALONE_MCP_SERVER_ID}/*`,
         handler: async (c, next) => {
           if (!(await authenticate(c.req.header("authorization")))) {

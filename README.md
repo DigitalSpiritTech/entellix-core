@@ -1,5 +1,9 @@
 # Entellix Core
 
+[![Checks](https://github.com/DigitalSpiritTech/entellix-core/actions/workflows/checks.yml/badge.svg)](https://github.com/DigitalSpiritTech/entellix-core/actions/workflows/checks.yml)
+[![Latest release](https://img.shields.io/github/v/release/DigitalSpiritTech/entellix-core?display_name=tag&sort=semver)](https://github.com/DigitalSpiritTech/entellix-core/releases/latest)
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+
 Entellix Core is the Apache-2.0 foundation for durable organizational memory in
 MCP-capable AI clients. This repository contains the provider-neutral memory
 engine, its versioned Zod contracts, reusable MCP instructions, and a
@@ -54,12 +58,17 @@ source, packed npm packages, standalone distribution, dependency audit, secret
 scan, and legal preflight without publishing anything.
 
 Publishing is performed only by the repository release workflow after a
-version pull request is merged.
+version pull request is merged. See [SUPPORT.md](SUPPORT.md) for the current
+`0.x` compatibility and support policy.
 
 ## Contributing and security
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) before proposing changes. Report
 vulnerabilities privately as described in [SECURITY.md](SECURITY.md).
+
+Entellix is a product of Digital Spirit Technology. Its public source and
+release identity are maintained in the
+[`DigitalSpiritTech`](https://github.com/DigitalSpiritTech) GitHub organization.
 
 ## License
 

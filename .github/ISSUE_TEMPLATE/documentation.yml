@@ -1,0 +1,29 @@
+name: Documentation gap
+description: Report unclear, missing, or incorrect public documentation.
+title: "[Docs]: "
+body:
+  - type: input
+    id: location
+    attributes:
+      label: Documentation location
+      description: Link the page or name the packaged README and section.
+    validations:
+      required: true
+  - type: textarea
+    id: task
+    attributes:
+      label: What were you trying to do?
+    validations:
+      required: true
+  - type: textarea
+    id: gap
+    attributes:
+      label: What was unclear or incorrect?
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested improvement
+    validations:
+      required: false

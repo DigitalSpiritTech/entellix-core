@@ -48,10 +48,14 @@ ENTELLIX_SMOKE_DATABASE_URL=postgres://.../entellix_smoke \
 ```
 
 Add `--provider-round-trip` and supply `ANTHROPIC_API_KEY` for the pre-release
-save/process/list proof. Optional embedding variables exercise semantic
+save/process/review/list proof. Optional embedding variables exercise semantic
 retrieval during the same run. Never print or record provider credentials.
 
 ## Release flow
+
+The `0.1.0` packages established npm trusted publishing and provenance. The
+`0.1.1` topology made standalone artifact production a continuation of that same
+workflow and added GitHub artifact attestation and release-asset verification.
 
 Add a Changeset for public behavior, merge through a pull request, then merge
 the Changesets-generated version pull request. Publishing uses npm trusted

@@ -1,8 +1,8 @@
 # Entellix Core Public Beta Readiness
 
-Status: Active — Phase 2 implemented; release validation pending
+Status: Active — Phase 3 complete; Phase 4 in progress
 Started: 2026-08-17
-Target: the next public Entellix Core release after `0.1.0`
+Target: the next public Entellix Core release after `0.1.1`
 
 ## Outcome
 
@@ -20,11 +20,10 @@ artifacts and documentation.
   secret, and legal release gates.
 - The `@entellix/standalone@0.1.1` release topology builds, attests, uploads, and
   verifies the versioned standalone archive in the trusted release workflow.
-- The standalone README and npm package READMEs describe ownership but do not
-  yet provide adequate installation, configuration, usage, or verification
-  guidance.
-- Some security and release documentation still describes the first public
-  release as pending.
+- The standalone README and npm package READMEs provide executable installation,
+  configuration, usage, and verification guidance checked from packed artifacts.
+- Security, support, release, ADR, and agent context now describe the shipped
+  public beta and its trusted publication and attestation controls.
 
 ## Implementation Constraints
 
@@ -72,7 +71,7 @@ version commit records the corrected distribution path.
 
 ## Phase 2: Make the Public Surface Usable
 
-Status: Implemented (2026-08-18); provider-backed release validation pending
+Status: Complete (2026-08-19)
 
 ### Goal
 
@@ -265,24 +264,66 @@ Deliverables:
 - The credential-free clean-room smoke passed on macOS with Node 24.10.0, a
   PostgreSQL 16 container, and the locally assembled `0.1.1` archive. Pull
   request CI repeats it for PostgreSQL 16, 17, and 18.
-- The same runner supports `--provider-round-trip` for the pre-release
-  Anthropic-backed save/process/list proof. That release evidence remains
-  pending because no provider credentials were available in the implementation
-  environment.
+- The `--provider-round-trip` release gate passed on 2026-08-19 from the packed
+  `0.1.1` archive in a disposable Debian/Node 24.19.0 container against a private
+  PostgreSQL 16 test database. It exercised authenticated save, provider-backed
+  extraction and classification, review approval, canonical commit, and list
+  retrieval with embeddings enabled; the disposable database was removed after
+  the run.
 
 ## Phase 3: Normalize Public Status and Governance
 
-1. Update `SECURITY.md`, release operations, ADRs, and agent context to record
+Status: Complete (2026-08-20)
+
+### Implementation decisions
+
+1. Support only the latest published `0.x` release unless a security advisory
+   explicitly names an exception. Treat `main`, older releases, prereleases, and
+   canaries as unsupported development or validation states.
+2. Allow breaking public-API changes in `0.x` minor releases, while treating
+   patch releases as compatible unless security or correctness requires a break.
+   Communicate user-visible changes through Changesets, generated changelogs,
+   and GitHub release notes.
+3. Keep the landing page operational: expose CI, latest-release, and license
+   status, then link to support, contribution, security, and ownership details
+   without adding promotional sections.
+4. Preserve `DigitalSpiritTech/entellix-core` as Entellix's confirmed long-term
+   release identity. Any future repository move requires an explicit product-owner
+   decision and immediate updates to trusted publishers, repository metadata,
+   documentation links, and release verification.
+
+5. Update `SECURITY.md`, release operations, ADRs, and agent context to record
    that `0.1.0` shipped with trusted publishing and provenance.
-2. Remove or rewrite first-release blockers that are no longer true.
-3. Add concise CI/release/license badges and useful GitHub topics to improve
+6. Remove or rewrite first-release blockers that are no longer true.
+7. Add concise CI/release/license badges and useful GitHub topics to improve
    public discoverability without turning the README into marketing copy.
-4. Add focused issue templates for bugs, documentation gaps, and proposals.
-5. State the support policy for the current `0.x` line and how breaking changes
+8. Add focused issue templates for bugs, documentation gaps, and proposals.
+9. State the support policy for the current `0.x` line and how breaking changes
    will be communicated.
-6. Confirm the long-term GitHub organization. If ownership moves, reconfigure
-   all npm trusted publishers, repository metadata, and release links
-   immediately after the move.
+10. Confirm the long-term GitHub organization. If ownership moves, reconfigure
+    all npm trusted publishers, repository metadata, and release links
+    immediately after the move.
+
+### Phase 3 implementation evidence
+
+- `SECURITY.md` and `SUPPORT.md` now describe the shipped early-public-beta
+  state, latest-`0.x` support boundary, breaking-change convention, private
+  reporting path, and trusted `0.1.0`/attested `0.1.1` release history.
+- The root README exposes CI, latest-release, and Apache-2.0 badges and links the
+  support, contribution, security, release, and current ownership paths.
+- ADR 0002 and `ai/` implementation context record npm OIDC publishing,
+  provenance, the corrected single-workflow standalone path, and the repository
+  move consequence.
+- Focused GitHub issue forms cover bugs, documentation gaps, and proposals;
+  blank issues are disabled and security reports route to private advisories.
+- The live GitHub repository has focused `ai-agents`, `long-term-memory`, `mcp`,
+  `postgresql`, `self-hosted`, `typescript`, and `zod` topics.
+- `scripts/public-governance.test.mjs` prevents stale first-release language and
+  missing landing-page, support, ADR, or issue-template governance surfaces from
+  silently returning.
+- The product owner confirmed `DigitalSpiritTech` as Entellix's long-term GitHub
+  organization on 2026-08-20; repository ownership and release identity now
+  match.
 
 ### Phase 3 acceptance
 
@@ -293,6 +334,8 @@ Deliverables:
 - Repository ownership matches the organization that owns the Entellix product.
 
 ## Phase 4: Publish and Prove the Public Beta
+
+Status: In progress (2026-08-20)
 
 1. Add the required Changeset and run `pnpm check:all`.
 2. Open and merge a focused implementation PR.

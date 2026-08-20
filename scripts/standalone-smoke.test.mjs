@@ -5,7 +5,14 @@ import {
   buildStandaloneWorkspace,
   findMissingStandaloneArchiveRequirement,
 } from "./package-standalone.mjs";
-import { assertDisposableDatabaseUrl, parseMcpResponse } from "./standalone-smoke-lib.mjs";
+import {
+  assertDisposableDatabaseUrl,
+  buildStandaloneServerEnv,
+  findReviewCandidateByEventId,
+  isSuccessfulMcpToolCall,
+  parseMcpToolJson,
+  parseMcpResponse,
+} from "./standalone-smoke-lib.mjs";
 
 test("builds standalone artifacts through the workspace dependency graph", () => {
   const invocations = [];
@@ -54,5 +61,46 @@ test("parses JSON and streamable HTTP event responses", () => {
   assert.deepEqual(
     parseMcpResponse("text/event-stream", `event: message\ndata: ${JSON.stringify(message)}\n\n`),
     message,
+  );
+});
+
+test("pins the spawned standalone server to the smoke token", () => {
+  assert.deepEqual(
+    buildStandaloneServerEnv(
+      { ENTELLIX_LOCAL_TOKEN: "inherited-token", NODE_ENV: "test" },
+      "smoke-token",
+      4211,
+    ),
+    {
+      ENTELLIX_LOCAL_TOKEN: "smoke-token",
+      NODE_ENV: "test",
+      PORT: "4211",
+    },
+  );
+});
+
+test("accepts explicit and implicit MCP tool success markers", () => {
+  assert.equal(isSuccessfulMcpToolCall({ result: {} }), true);
+  assert.equal(isSuccessfulMcpToolCall({ result: { isError: false } }), true);
+  assert.equal(isSuccessfulMcpToolCall({ result: { isError: true } }), false);
+});
+
+test("links a queued MCP receipt to its review candidate", () => {
+  const eventId = "00000000-0000-4000-8000-0000000000e1";
+  const response = {
+    result: {
+      content: [{ type: "text", text: JSON.stringify({ status: "queued", eventId }) }],
+    },
+  };
+  const receipt = parseMcpToolJson(response);
+  const expected = { candidateId: "candidate-1", sourceEventIds: [eventId] };
+
+  assert.equal(receipt.eventId, eventId);
+  assert.equal(
+    findReviewCandidateByEventId(
+      [{ candidateId: "candidate-2", sourceEventIds: [] }, expected],
+      eventId,
+    ),
+    expected,
   );
 });
