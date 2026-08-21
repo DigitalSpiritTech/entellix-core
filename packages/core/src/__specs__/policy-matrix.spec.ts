@@ -23,7 +23,7 @@ import {
 } from "../policy-matrix.ts";
 
 /**
- * Unit surface for S2.2.2 — the confidence policy-matrix engine. Pure and
+ * Unit surface for the confidence policy-matrix engine. Pure and
  * table-driven: no Postgres, HTTP, or model. The assertions pin the implemented
  * lookup, hard-rule, and simulation behavior.
  *
@@ -248,7 +248,7 @@ describe("evaluateDisposition — hard-rule bypass attempts fail", () => {
   });
 
   it("(e) USER-owned org-visible directive → review (owner never gates the org-visible rule)", () => {
-    // Bypass attempt found in Sprint 2.2 review: owner=user + audience=org_members
+    // Regression case: owner=user plus audience=org_members
     // + first_party used to slip past every hard rule, letting a permissive cell
     // auto-commit an org-visible directive. The rule must be owner-independent.
     const decision = evaluateDisposition({

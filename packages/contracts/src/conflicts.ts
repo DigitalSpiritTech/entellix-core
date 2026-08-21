@@ -1,5 +1,5 @@
 /**
- * Implements conflicts behavior for this TypeScript module.
+ * Defines conflict relations and detector results for candidate reconciliation.
  *
  * Inputs: Imported dependencies and values passed to the module's documented functions.
  * Outputs: Exported types, values, and behavior provided by the module.
@@ -13,12 +13,12 @@ import { z } from "zod";
 import { memoryTypeSchema, ownerScopeTypeSchema } from "./memory-v2.ts";
 
 /**
- * Conflict-detection contracts (S2.2.3). Before a classified candidate is
+ * Conflict-detection contracts. Before a classified candidate is
  * committed, it is compared against the caller's existing ACTIVE memories in the
  * same owner + entity neighborhood. Nearest neighbors (vector + FTS, scoped to
  * the same owner_scope with overlapping entity links) are classified pairwise
  * into one of four relations, and those annotations drive a reconciler
- * operation suggestion (PRD §10, Decision 5–7). Conflict annotations are
+ * operation suggestion. Conflict annotations are
  * staging metadata on a candidate — never canonical memory, never written by an
  * external agent (only the service-role pipeline persists them).
  *

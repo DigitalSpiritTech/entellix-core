@@ -1,5 +1,5 @@
 /**
- * Implements candidates behavior for this TypeScript module.
+ * Defines validated extractor outputs and persisted memory-candidate records.
  *
  * Inputs: Imported dependencies and values passed to the module's documented functions.
  * Outputs: Exported types, values, and behavior provided by the module.
@@ -13,12 +13,12 @@ import { z } from "zod";
 import { memoryTypeSchema } from "./memory-v2.ts";
 
 /**
- * Memory-candidate contracts (S2.1.3). The extractor turns a session batch into
+ * Memory-candidate contracts. The extractor turns a session batch into
  * 0..N discrete candidate memories, each with an evidence span and a short
  * user-facing reason. Candidates are the pipeline's staging shape: they are NOT
  * canonical memory and are never written by an external agent — only the
  * service-role extractor worker persists them, and they earn commitment through
- * classification + reconciliation later in the pipeline (PRD §10, Decision 1).
+ * classification and reconciliation later in the pipeline.
  *
  * Convention mirrors the rest of contracts: `const FOO = [...] as const` →
  * `fooSchema = z.enum(FOO)` → `z.infer`. Deliberately NOT re-exported from the
@@ -30,10 +30,10 @@ const isoDatetimeSchema = z.iso.datetime({ offset: true });
 
 /**
  * Candidate lifecycle. `pending_classification` is the birth state written by
- * the extractor; the classifier suite (S2.2.1) advances to `classified`; the
+ * the extractor; the classifier suite advances to `classified`; the
  * policy matrix can route it to `review` or `rejected`, and reconciliation
  * advances successful writes to `committed`; stale candidates `expire`. Routing only — never a
- * terminal discard (Decision 1 mirrors the salience gate's no-drop rule).
+ * terminal discard, preserving the salience gate's no-drop rule.
  */
 export const CANDIDATE_STATUSES = [
   "pending_classification",
@@ -51,8 +51,8 @@ export const EXTRACTOR_PROMPT_VERSION = "extractor/2026-07-06";
 
 /**
  * Cap on the user-facing rationale. `reasonSummary` is the ONLY rationale field
- * a candidate carries — no chain-of-thought is ever persisted (AC: "short
- * user-facing reason (no chain-of-thought persisted)"). Short by construction.
+ * a candidate carries. No chain-of-thought is persisted; the user-facing reason
+ * is short by construction.
  */
 export const CANDIDATE_REASON_MAX_LENGTH = 280;
 
@@ -61,7 +61,7 @@ export const CANDIDATE_REASON_MAX_LENGTH = 280;
  * LLM output). `evidenceSpan` is a verbatim excerpt of the source batch text;
  * for `directive` candidates the extractor additionally forces
  * `candidateText` byte-equal to the evidence span (no normalization at
- * extraction — Decision 10). Substring/byte-equality are runtime invariants the
+ * extraction. Substring and byte-equality are runtime invariants the
  * extractor enforces; the schema only bounds shape and length.
  */
 export const extractedCandidateSchema = z.object({
@@ -115,7 +115,7 @@ export type ExtractionResult = z.infer<typeof extractionResultSchema>;
  * The persisted `memory_candidates` row shape. `batchId` + `sourceEventIds`
  * link the candidate back to its session batch and the append-only events it
  * came from; `extractorVersion` + `model` stamp the versioned config that
- * produced it. `activeOrgId` is context, never ownership (Decision 4).
+ * produced it. `activeOrgId` is context, never ownership.
  */
 export const memoryCandidateSchema = z.object({
   id: z.uuid(),

@@ -1,5 +1,5 @@
 /**
- * Implements providers behavior for this TypeScript module.
+ * Adapts generation and embedding providers to the core engine ports.
  *
  * Inputs: Imported dependencies and values passed to the module's documented functions.
  * Outputs: Exported types, values, and behavior provided by the module.

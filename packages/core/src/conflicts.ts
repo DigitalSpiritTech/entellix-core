@@ -1,5 +1,5 @@
 /**
- * Implements conflicts behavior for this TypeScript module.
+ * Detects candidate conflicts and selects reconciliation-oriented relations.
  *
  * Inputs: Imported dependencies and values passed to the module's documented functions.
  * Outputs: Exported types, values, and behavior provided by the module.

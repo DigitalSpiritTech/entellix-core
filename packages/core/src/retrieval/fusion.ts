@@ -1,5 +1,5 @@
 /**
- * Implements fusion behavior for this TypeScript module.
+ * Fuses retrieval lanes, enforces visibility, and applies relevance ranking.
  *
  * Inputs: Imported dependencies and values passed to the module's documented functions.
  * Outputs: Exported types, values, and behavior provided by the module.
@@ -281,7 +281,7 @@ export function applyBoosts(input: {
 /**
  * Rerank hook seam. Identity unless `config.rerankEnabled` is explicitly true AND
  * a `rerank` fn is supplied. When disabled it MUST NOT invoke `rerank` (no
- * reranker on the normal path — Decision 20).
+ * reranker on the normal path).
  *
  * @param input - Value supplied for `input`.
  * @returns The result produced by `maybeRerank`.

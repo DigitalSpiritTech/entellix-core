@@ -1,5 +1,5 @@
 /**
- * Implements memory v2 behavior for this TypeScript module.
+ * Defines canonical memory ownership, audience, provenance, and lifecycle contracts.
  *
  * Inputs: Imported dependencies and values passed to the module's documented functions.
  * Outputs: Exported types, values, and behavior provided by the module.

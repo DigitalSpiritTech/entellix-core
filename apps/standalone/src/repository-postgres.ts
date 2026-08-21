@@ -1,5 +1,5 @@
 /**
- * Implements repository postgres behavior for this TypeScript module.
+ * Implements durable standalone memory persistence in PostgreSQL.
  *
  * Inputs: Imported dependencies and values passed to the module's documented functions.
  * Outputs: Exported types, values, and behavior provided by the module.

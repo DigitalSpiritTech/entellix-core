@@ -1,5 +1,5 @@
 /**
- * Implements model output behavior for this TypeScript module.
+ * Recovers and validates JSON values from tolerant model text responses.
  *
  * Inputs: Imported dependencies and values passed to the module's documented functions.
  * Outputs: Exported types, values, and behavior provided by the module.
@@ -9,7 +9,7 @@
  */
 
 /**
- * Tolerant JSON extraction for model-backed core stages (ADR 0019). The model
+ * Tolerant JSON extraction for model-backed core stages. The model
  * boundary is text-in/text-out (`generateText`), and even when the prompt demands
  * "raw JSON only", chat models routinely wrap the payload in a ```json fence or
  * add a one-line preface. A bare `JSON.parse` on that text fails — and since the

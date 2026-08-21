@@ -1,5 +1,5 @@
 /**
- * Implements reconciler behavior for this TypeScript module.
+ * Defines canonical-memory reconciliation operations, inputs, and results.
  *
  * Inputs: Imported dependencies and values passed to the module's documented functions.
  * Outputs: Exported types, values, and behavior provided by the module.
@@ -21,7 +21,7 @@ import {
 } from "./memory-v2.ts";
 
 /**
- * Reconciler contracts (S2.2.4). The reconciler is the single transactional
+ * Reconciler contracts. The reconciler is the single transactional
  * writer that turns a governed, enriched candidate into a canonical `memories`
  * row with bi-temporal validity and full version history. It is the ONLY place
  * canonical memory is minted — external agents never write `memories` (Core
@@ -36,7 +36,7 @@ import {
 const isoDatetimeSchema = z.iso.datetime({ offset: true });
 
 /**
- * The seven reconcile operations (PRD §10). NOTE: `REVIEW` is deliberately
+ * The seven reconcile operations. `REVIEW` is deliberately
  * absent — it is a policy-matrix disposition, not a bi-temporal write. A
  * candidate that should be reviewed never reaches the reconciler as an
  * auto-committable operation.
@@ -61,8 +61,8 @@ export const reconcileOperationSchema = z.enum(RECONCILE_OPERATIONS);
 export type ReconcileOperation = z.infer<typeof reconcileOperationSchema>;
 
 /**
- * Row-policy shape derived from a memory's type at commit (Decision 17, made
- * executable). `renderPolicy` + `contentVerbatim` are NOT free choices per row:
+ * Row-policy shape derived from a memory's type at commit. `renderPolicy` and
+ * `contentVerbatim` are not free choices per row:
  * they are a function of `memoryType`, so a service worker cannot silently mint
  * a pinned/verbatim row of the wrong type. Overrides exist ONLY through the
  * review path (not encoded here). `defaultTtlDays` seeds `expires_at` for
@@ -76,11 +76,11 @@ export const typeDerivedPolicySchema = z.object({
 export type TypeDerivedPolicy = z.infer<typeof typeDerivedPolicySchema>;
 
 /**
- * Type → row-policy map (Decision 17). Encoded choices, documented:
+ * Type-to-row-policy map. Encoded choices:
  *
  * - `directive`  → { pinned, verbatim, no-ttl }. The canonical verbatim type:
- *   byte-identical storage + always pinned into packets (Decision 10, PRD §9).
- * - `policy`     → { pinned, verbatim, no-ttl }. PRD §8: a `policy` memory
+ *   byte-identical storage and always pinned into packets.
+ * - `policy`     → { pinned, verbatim, no-ttl }. A `policy` memory
  *   materializes as an org-level directive, so it inherits directive semantics —
  *   verbatim + pinned. This is why the policy-matrix hard rules treat
  *   "directives/policies" together (org-visible → review). Documented choice.
@@ -192,7 +192,7 @@ export type ReconcileCandidate = z.infer<typeof reconcileCandidateSchema>;
  * One reconcile request: an enriched candidate + the operation to execute.
  * `targetMemoryId` is required by SUPERSEDE/UPDATE/MERGE/EXPIRE (the row acted
  * on) and unused by ADD/SPLIT/NOOP-on-new. `conflictAnnotations` carry the
- * S2.2.3 neighborhood analysis so the reconciler can confirm the operation.
+ * neighborhood analysis so the reconciler can confirm the operation.
  */
 export const reconcileInputSchema = z.object({
   candidate: reconcileCandidateSchema,
@@ -206,7 +206,7 @@ export type ReconcileInput = z.infer<typeof reconcileInputSchema>;
  * The outcome of one reconcile. `memoryId` is the canonical row written (null
  * for NOOP, which mints nothing). `supersededMemoryId` is set by SUPERSEDE.
  * `versionRecorded` asserts a memory_versions row was written for this mutation
- * (AC: every mutation has a version). `projectionsMarkedDirty` records that
+ * for every mutation. `projectionsMarkedDirty` records that
  * affected projection_manifests were flagged for regeneration.
  */
 export const reconcileResultSchema = z.object({

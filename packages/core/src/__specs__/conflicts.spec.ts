@@ -29,7 +29,7 @@ import {
 } from "../conflicts.ts";
 
 /**
- * Unit surface for S2.2.3 — conflict detection. Exercises the pure operation
+ * Unit surface for conflict detection. Exercises the pure operation
  * suggester, the pure neighbor-scope filter builder, and the pair classifier
  * with a FAKE generate() (the raw LLM call is injected) and hand-built neighbor
  * rows, so these must NOT touch Postgres, Supabase, an HTTP server, or a real

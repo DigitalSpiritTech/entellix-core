@@ -1,5 +1,5 @@
 /**
- * Implements classifier prompt behavior for this TypeScript module.
+ * Provides the versioned model prompt for candidate governance classification.
  *
  * Inputs: Imported dependencies and values passed to the module's documented functions.
  * Outputs: Exported types, values, and behavior provided by the module.

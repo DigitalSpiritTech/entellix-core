@@ -1,5 +1,5 @@
 /**
- * Implements directive precedence behavior for this TypeScript module.
+ * Resolves and renders in-scope directives according to deterministic precedence.
  *
  * Inputs: Imported dependencies and values passed to the module's documented functions.
  * Outputs: Exported types, values, and behavior provided by the module.
@@ -26,10 +26,10 @@ export type {
 } from "@entellix/contracts/directive-precedence";
 
 /**
- * Directive precedence engine (S2.3.3). Resolves the caller's ACTIVE, in-scope
+ * Directive precedence engine. Resolves the caller's active, in-scope
  * directives by specificity, annotates overrides, and renders a channel-aware
  * directive block; genuinely unresolvable conflicts render both and log a review
- * item (PRD §9 precedence; Decisions 11, 12).
+ * item.
  *
  * The semantic conflict check is INJECTED (`conflictCheck`) so packet-time
  * conflict detection is deterministic in tests and never requires an LLM:
@@ -357,7 +357,7 @@ export function resolveDirectives(input: ResolveDirectivesInput): Resolution {
  *     SEPARATE annotation lines (content bytes never mutated);
  *   - `hook_injection`: declarative framing wrapper AROUND the verbatim bytes —
  *     presents each rule as information in effect, never an imperative paraphrase
- *     (Decision 12).
+ *     while preserving the original bytes.
  * Exact strings are pinned by the spec's inline snapshots.
  *
  * @param input - Value supplied for `input`.

@@ -25,12 +25,12 @@ import {
 } from "../directive-precedence.ts";
 
 /**
- * Unit surface for S2.3.3 — directive precedence + override annotations. Pure
+ * Unit surface for directive precedence and override annotations. Pure
  * resolver + renderer + pair-conflict primitive, exercised with hand-built
  * directives and an INJECTED deterministic conflict check (no LLM, no Postgres,
  * no HTTP).
  *
- * The ratified case (Decision 11, executable) is encoded here directly from the
+ * The organization-versus-project override case is encoded here directly from the
  * golden set: `directive/no-nextjs-org` (org-general "never Next.js") vs
  * `directive/acme-requires-nextjs` (project-scoped "use Next.js on Acme"). In
  * Acme context the project rule wins WITH an override annotation and the org
@@ -239,7 +239,7 @@ describe("detectDirectConflict — subject overlap AND injected semantics", () =
   });
 });
 
-describe("resolveDirectives — the ratified org-vs-project override case (Decision 11)", () => {
+describe("resolveDirectives — organization-versus-project override", () => {
   it("in Acme context: project rule wins WITH override annotation, org rule excluded", () => {
     const resolution = resolveDirectives({
       directives: [orgRule, projectRule, styleRule],
@@ -397,7 +397,7 @@ describe("resolveDirectives — audience filter", () => {
 });
 
 describe("renderDirectiveBlock — channel-aware, verbatim-preserving", () => {
-  // Resolution shaped like the ratified case: project rule with an override
+  // Project rule with an override
   // annotation, plus the user-general style rule.
   const resolution = {
     active: [
@@ -443,7 +443,7 @@ describe("renderDirectiveBlock — channel-aware, verbatim-preserving", () => {
     );
   });
 
-  it("hook_injection: declarative framing AROUND the same verbatim bytes (Decision 12)", () => {
+  it("hook_injection: declarative framing around the same verbatim bytes", () => {
     const block = renderDirectiveBlock({ resolution, channel: "hook_injection" });
     expect(block).toMatchInlineSnapshot(`
       "Project information — the following operating rules are in effect:

@@ -1,5 +1,5 @@
 /**
- * Implements directives behavior for this TypeScript module.
+ * Defines directive creation, ordering, and packet-rendering contracts.
  *
  * Inputs: Imported dependencies and values passed to the module's documented functions.
  * Outputs: Exported types, values, and behavior provided by the module.
@@ -14,11 +14,11 @@ import { sourceTrustClassSchema } from "./events.ts";
 import { memoryTypeSchema, renderPolicySchema } from "./memory-v2.ts";
 
 /**
- * Directive-core contracts (S2.3.2). Directives (memory_type=directive) are the
+ * Directive-core contracts. Directives (`memory_type=directive`) are the
  * VERBATIM type: their content is stored and rendered byte-for-byte, they are
  * always pinned into the context packet, and they may be created only from a
  * first-person explicit statement (first_party trust) or the review UI — never
- * silently from ambient/external content (Decisions 10, 12, 18; PRD §9).
+ * silently from ambient or external content.
  *
  * This module is the single source of truth for two shapes the directive engine
  * (`@entellix/core/directives`) produces:
@@ -35,7 +35,7 @@ import { memoryTypeSchema, renderPolicySchema } from "./memory-v2.ts";
 
 /**
  * Default packet cap: the maximum number of directive CONTENT LINES pinned into
- * one packet (PRD §9). Counted across all pinned directives — a single
+ * one packet. Counted across all pinned directives — a single
  * multi-line directive consumes as many lines as it has. Directives beyond the
  * cap are ranked out into `overflow` (listed by title) with a fetch hint.
  */
@@ -43,9 +43,8 @@ export const DIRECTIVE_PACKET_CAP_DEFAULT = 15;
 
 /**
  * One pinned directive in the packet block. `content` is the VERBATIM directive
- * text — byte-for-byte as stored, never canonicalized (the verbatim carve-out,
- * Decision 10). `precedenceRank` is the resolved precedence order (lower = wins;
- * from the precedence engine S2.3.3) used to decide what overflows when the cap
+ * text — byte-for-byte as stored, never canonicalized. `precedenceRank` is the
+ * resolved precedence order (lower wins), used to decide what overflows when the cap
  * is hit. `overrideAnnotation` is the rendered override note when a more-specific
  * directive overrides a broader one ("Project Acme requires Next.js — overrides
  * the org rule for this project").
@@ -95,7 +94,7 @@ export const directiveCreationViaSchema = z.enum(DIRECTIVE_CREATION_VIAS);
 export type DirectiveCreationVia = z.infer<typeof directiveCreationViaSchema>;
 
 /**
- * Inputs the directive-creation gate reads (S2.3.2). `sourceTrustClass` is
+ * Inputs the directive-creation gate reads. `sourceTrustClass` is
  * carried from the source event; `isFirstPersonExplicit` is the classifier's
  * signal that the statement is a first-person explicit standing rule ("from now
  * on I always …"), NOT ambient/observed content. Only `review_ui`, or

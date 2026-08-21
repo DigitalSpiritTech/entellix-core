@@ -26,7 +26,7 @@ import {
 } from "../extractor.ts";
 
 /**
- * Unit surface for S2.1.3 — the multi-candidate extractor. Exercises the
+ * Unit surface for the multi-candidate extractor. Exercises the
  * extractor factory in isolation with a FAKE generate() (the raw LLM call is
  * injected) and hand-built event rows, so these must NOT touch Postgres,
  * an HTTP server, or a real model. These assertions pin the implemented
@@ -116,7 +116,7 @@ describe("createExtractor — directive candidates stay byte-verbatim", () => {
     const input = `Hard rule for the team: ${evidence}.`;
     const generate = vi.fn<ExtractorGenerateFn>(async () =>
       // The model paraphrased candidateText — the extractor must refuse the
-      // paraphrase and normalize to the verbatim evidence span (Decision 10).
+      // paraphrase and normalize to the verbatim evidence span.
       modelOutput([
         {
           candidateText: "Do not deploy on Fridays",

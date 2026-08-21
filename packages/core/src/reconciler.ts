@@ -1,5 +1,5 @@
 /**
- * Implements reconciler behavior for this TypeScript module.
+ * Applies deterministic canonicalization, row-policy, and operation-selection rules.
  *
  * Inputs: Imported dependencies and values passed to the module's documented functions.
  * Outputs: Exported types, values, and behavior provided by the module.
@@ -19,12 +19,12 @@ import {
 
 export type { DerivedRowPolicies, OperationSelection } from "@entellix/contracts/reconciler";
 /**
- * Provider-neutral reconciliation rules (S2.2.4). A host adapter applies these
+ * Provider-neutral reconciliation rules. A host adapter applies these
  * decisions transactionally to its canonical memory repository.
  *
  * NO DELETE PATH: this module deliberately exports no delete-named member.
  * EXPIRE ends a row's life via status='expired'; SUPERSEDE closes valid_to and
- * chains superseded_by — rows are never removed (Core invariant 4). The unit
+ * chains superseded_by, so rows are never removed. The unit
  * spec asserts the exported surface has no delete member; the integration spec
  * asserts row counts never decrease through any operation.
  */
@@ -85,9 +85,9 @@ export function isReconcilerError(value: unknown): value is ReconcilerError {
 }
 
 /**
- * Verbatim carve-out guard (Decision 10, PRD §9). For directive/policy content
+ * Verbatim-content guard. For directive and policy content
  * the stored bytes MUST equal the source bytes — no canonicalization,
- * summarization, or merge may touch them. This guard is LIVE (not a stub): it
+ * summarization, or merge may touch them. This guard runs on every write and
  * throws the moment stored content drifts from the original, protecting the
  * transactional commit boundary and its byte-equality property tests.
  *
@@ -124,7 +124,7 @@ export function assertDirectiveByteEquality(original: string, stored: string): v
  * @throws Errors raised by validation or dependent operations.
  */
 export function canonicalizeContent(input: { text: string; memoryType: MemoryType }): string {
-  // Verbatim carve-out (Decision 10): directive/policy content is returned
+  // Verbatim rule: directive and policy content is returned
   // byte-for-byte, so the byte-equality property test holds through commit.
   if (TYPE_DERIVED_POLICIES[input.memoryType].contentVerbatim) return input.text;
 
@@ -150,7 +150,7 @@ export function canonicalizeContent(input: { text: string; memoryType: MemoryTyp
 
 /**
  * Derive render_policy / content_verbatim / expires_at from the memory type at
- * commit (Decision 17). PURE — reads TYPE_DERIVED_POLICIES and resolves
+ * commit. Reads TYPE_DERIVED_POLICIES and resolves
  * `defaultTtlDays` against the injected `now`.
  *
  * @param memoryType - Value supplied for `memoryType`.
@@ -191,7 +191,7 @@ export function selectOperation(input: {
   const { dispositionOperationGuess, conflictAnnotations } = input;
 
   // Contradictions never auto-commit — reaching the reconciler is a guard
-  // violation (they route to review upstream, S2.2.3).
+  // violation because conflicting candidates route to review upstream.
   if (conflictAnnotations.some((annotation) => annotation.relation === "contradicts")) {
     throw createReconcilerError(
       "contradiction_not_auto_committable",

@@ -1,5 +1,5 @@
 /**
- * Implements config behavior for this TypeScript module.
+ * Validates environment configuration for the single-workspace standalone host.
  *
  * Inputs: Imported dependencies and values passed to the module's documented functions.
  * Outputs: Exported types, values, and behavior provided by the module.

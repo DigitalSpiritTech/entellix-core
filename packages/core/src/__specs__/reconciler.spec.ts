@@ -22,8 +22,8 @@ import {
 } from "../reconciler.ts";
 
 /**
- * Unit surface for S2.2.4 — the reconciler's PURE parts (no Postgres, no HTTP,
- * no model). Exercises canonicalization, the type→policy derivation, operation
+ * Unit surface for the reconciler's pure parts (no PostgreSQL, HTTP, or model).
+ * Exercises canonicalization, type-to-policy derivation, operation
  * selection from conflict annotations, and the verbatim byte-equality carve-out.
  * The assertions pin the implemented pure rules and typed guard failures.
  */
@@ -32,10 +32,10 @@ const A_UUID = "00000000-0000-4000-8000-0000000000f1";
 const B_UUID = "00000000-0000-4000-8000-0000000000f2";
 
 // ---------------------------------------------------------------------------
-// TYPE_DERIVED_POLICIES — Decision 17 made executable (LIVE contract constant).
+// TYPE_DERIVED_POLICIES — executable type-derived policy contract.
 // ---------------------------------------------------------------------------
 
-describe("TYPE_DERIVED_POLICIES — type-derived render/verbatim/ttl (Decision 17)", () => {
+describe("TYPE_DERIVED_POLICIES — type-derived render/verbatim/ttl", () => {
   const ALL_TYPES: MemoryType[] = [
     "fact",
     "preference",
@@ -52,7 +52,7 @@ describe("TYPE_DERIVED_POLICIES — type-derived render/verbatim/ttl (Decision 1
     expect(Object.keys(TYPE_DERIVED_POLICIES).toSorted()).toEqual(ALL_TYPES.toSorted());
   });
 
-  it("makes directive and policy verbatim + pinned (PRD §8/§9, Decision 10)", () => {
+  it("makes directive and policy verbatim and pinned", () => {
     for (const type of ["directive", "policy"] as const) {
       expect(TYPE_DERIVED_POLICIES[type].contentVerbatim).toBe(true);
       expect(TYPE_DERIVED_POLICIES[type].renderPolicy).toBe("pinned");
@@ -121,7 +121,7 @@ describe("canonicalizeContent — non-verbatim normalization", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Directive / policy verbatim byte-equality (Decision 10, PRD §9).
+// Directive and policy verbatim byte-equality.
 // ---------------------------------------------------------------------------
 
 /**
@@ -187,7 +187,7 @@ describe("assertDirectiveByteEquality — the verbatim carve-out guard (LIVE)", 
 });
 
 // ---------------------------------------------------------------------------
-// deriveRowPolicies — type → policy + expires_at from ttl (RED).
+// deriveRowPolicies — type to policy plus expires_at from TTL.
 // ---------------------------------------------------------------------------
 
 describe("deriveRowPolicies — render/verbatim/expires_at from type", () => {
@@ -221,7 +221,7 @@ describe("deriveRowPolicies — render/verbatim/expires_at from type", () => {
 });
 
 // ---------------------------------------------------------------------------
-// selectOperation — operation from conflict annotations (RED).
+// selectOperation — operation from conflict annotations.
 // ---------------------------------------------------------------------------
 
 describe("selectOperation — operation from conflict annotations", () => {

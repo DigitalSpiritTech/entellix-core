@@ -1,5 +1,5 @@
 /**
- * Implements salience behavior for this TypeScript module.
+ * Routes intake events by urgency using a versioned lexical salience gate.
  *
  * Inputs: Imported dependencies and values passed to the module's documented functions.
  * Outputs: Exported types, values, and behavior provided by the module.
@@ -26,17 +26,17 @@ export type {
 } from "@entellix/contracts/pipeline";
 
 /**
- * Salience gate (S2.1.1). Cheap triage that decides WHEN/HOW URGENTLY an event
+ * Salience gate. Cheap triage that decides when and how urgently an event
  * is processed, never WHETHER it exists. Pure detection + routing here; the
  * a host adapter persists the decision without mutating the source event.
  *
- * The lexicon and type surface are the versioned interface (Decision 15). Extend
+ * The lexicon and type surface are the versioned interface. Extend
  * the trigger lexicon by adding phrases and bumping SALIENCE_LEXICON_VERSION.
  */
 
 /**
  * SALIENCE_TRIGGER_LEXICON — the documented, versioned hot-trigger lexicon
- * (Decision 15; DoD: "documented trigger lexicon, versioned"). Version is
+ * The trigger lexicon is documented and versioned. Version is
  * SALIENCE_LEXICON_VERSION. `detectHotTriggers` matches these phrases
  * case-insensitively on word boundaries. Extend by adding phrases and bumping
  * the lexicon version.

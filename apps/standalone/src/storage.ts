@@ -1,5 +1,5 @@
 /**
- * Implements storage behavior for this TypeScript module.
+ * Creates Mastra storage backed by the configured standalone PostgreSQL schema.
  *
  * Inputs: Imported dependencies and values passed to the module's documented functions.
  * Outputs: Exported types, values, and behavior provided by the module.

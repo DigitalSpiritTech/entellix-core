@@ -1,5 +1,5 @@
 /**
- * Implements policy matrix behavior for this TypeScript module.
+ * Evaluates governed dispositions and simulates versioned policy-matrix changes.
  *
  * Inputs: Imported dependencies and values passed to the module's documented functions.
  * Outputs: Exported types, values, and behavior provided by the module.
@@ -41,35 +41,32 @@ export type {
 } from "@entellix/contracts/policy-matrix";
 
 /**
- * Confidence policy-matrix engine (S2.2.2). Turns an enriched classification into
+ * Confidence policy-matrix engine. Turns an enriched classification into
  * a governed disposition by looking up a versioned matrix config, and enforces
  * hard rules IN CODE that no matrix cell can loosen. Pure functions
  * (`evaluateDisposition`, `simulateMatrix`). Persistence belongs to a host adapter.
- *
- * Behavior is pinned by pipeline/__specs__/policy-matrix.spec.ts (pure,
- * table-driven) and test/pipeline-policy-matrix.test.ts (persistence).
  *
  * ── Matrix change procedure ─
  *   1. SIMULATE — run the host distribution's matrix simulation command over
  *      sampled candidates,
  *      diffing the draft matrix against the active one. Review every `changed`
  *      candidate — especially any moving TOWARD auto_commit.
- *   2. REVIEW — Ted signs off on the diff (story DoD: the initial matrix and any
- *      change is reviewed before activation). DEFAULT_POLICY_MATRIX ships as a
- *      DRAFT (version '2.2.0-draft') and is NOT active until that sign-off.
+ *   2. REVIEW — a maintainer reviews the diff before activation.
+ *      DEFAULT_POLICY_MATRIX remains a reference draft and is not the
+ *      standalone host's active policy.
  *   3. ACTIVATE — bump the matrix `version`, land it as config, and record the
  *      activation. Every disposition thereafter stamps the new version for audit.
  */
 
 /*
  * The policy matrix keys on a narrow PROJECTION of the classifier's governance
- * verdict (`Classification`, S2.2.1): the memory type, the owner scope, the
+ * verdict (`Classification`): the memory type, owner scope,
  * suggested audience kind, the source authority, and the sensitivity assessment.
  * `SensitivityAssessment` is imported from the sibling classifier contracts — the
  * single source of truth for the `aboutAnotherPerson` flag the hard rules read.
  * `EvaluatedClassification` is the matrix-input tuple the engine and simulation
  * consume; the owner projection is a binary scope (`active_org_id` is context,
- * never a default owner — Decision 4/5), narrower than the classifier's
+ * never a default owner), narrower than the classifier's
  * confidence-carrying `OwnerAssessment`.
  */
 /**
@@ -84,15 +81,14 @@ export const HARD_RULES = {
    * audience≠private_to_owner AND type∈{directive,policy} → review, REGARDLESS
    * of owner: a user-owned directive whose audience reaches beyond the owner
    * (org_members, project_members, …) is still org-visible, so it may never
-   * auto-commit (Decision 18; S2.3.2 "org-visible directives review-gated
-   * regardless of confidence").
+   * auto-commit regardless of confidence.
    */
   orgVisibleDirectiveOrPolicy: "org_visible_directive_or_policy",
-  /** sensitivity.aboutAnotherPerson → review (Decision 18). */
+  /** sensitivity.aboutAnotherPerson → review. */
   aboutAnotherPerson: "about_another_person",
-  /** ambient/external (external_included) content proposing a rule → review (Decision 18). */
+  /** Ambient or external (`external_included`) content proposing a rule → review. */
   ambientRuleProposal: "ambient_source_rule_proposal",
-  /** directive from a non-first-party trust class → review (Decision 10). */
+  /** Directive from a non-first-party trust class → review. */
   nonFirstPartyDirective: "non_first_party_directive",
 } as const;
 /** The hard-rule floor: raises `auto_commit` to `review`, passes review/reject through.
@@ -120,7 +116,7 @@ function cellTuple(cell: PolicyMatrixCell): string {
  * order (about-another-person → org-visible directive/policy → ambient rule
  * proposal → non-first-party directive), or null when none applies. Enforced in
  * CODE, above the matrix, so no cell — however permissive — can bypass it
- * (Decisions 10, 18).
+ * by configuration.
  *
  * @param classification - Value supplied for `classification`.
  * @param sourceTrustClass - Value supplied for `sourceTrustClass`.
@@ -137,7 +133,7 @@ function detectHardRule(
   if (sensitivity.aboutAnotherPerson) return HARD_RULES.aboutAnotherPerson;
   // Deliberately owner-independent: a USER-owned directive with an org-visible
   // audience is just as governing for others as an org-owned one, so it gets the
-  // same untunable review floor (bypass found in Sprint 2.2 review).
+  // same untunable review floor.
   if (audienceSuggestion !== "private_to_owner" && isRuleType)
     return HARD_RULES.orgVisibleDirectiveOrPolicy;
   if (sourceTrustClass === "external_included" && isRuleType) return HARD_RULES.ambientRuleProposal;
@@ -237,7 +233,7 @@ function emptyDispositionCounts(): Record<Disposition, number> {
 
 /**
  * Replay N candidates against a draft matrix and diff dispositions vs the active
- * matrix, BEFORE activating (PRD §10 simulation mode). PURE — no persistence.
+ * matrix before activation. This function is pure and performs no persistence.
  *
  * @param rawInput - Value supplied for `rawInput`.
  * @returns The result produced by `simulateMatrix`.
@@ -281,11 +277,9 @@ export function simulateMatrix(rawInput: SimulateMatrixInput): SimulationDiff {
 }
 
 /**
- * DEFAULT_POLICY_MATRIX — the initial DRAFT matrix (version '2.2.0-draft'),
- * encoding the PRD §10 anchor rows. Marked draft on purpose: the story DoD
- * requires Ted to review before activation (see the matrix change procedure
- * above). Parsed through the contract schema so a malformed row fails at module
- * load, not at first use.
+ * DEFAULT_POLICY_MATRIX is a reference draft matrix. It is intentionally not the
+ * standalone host's active review-first policy. Parsed through the contract
+ * schema so a malformed row fails at module load rather than first use.
  *
  * Anchor rows encoded (cells matched most-specific-first, ties by array order):
  *   1. first-person preference (private, explicit, normal) → auto_commit @ 0.6

@@ -77,13 +77,13 @@ export const getContextInputSchema = z.object({
   taskContext: z.string().trim().min(1).max(4000),
   limit: retrievalLimitSchema,
   // Caller-ASSERTED envelope fields. Never trusted as-is: the service resolves
-  // the acting principal's real membership and overrides these (S3.1.3).
+  // the acting principal's real membership and overrides these values.
   assertedOrgId: z.uuid().optional(),
   assertedEntityIds: z.array(z.uuid()).optional(),
 });
 export type GetContextInput = z.input<typeof getContextInputSchema>;
 
-// v2 (S3.1.3): get_context returns a composed memory PACKET plus the
+// get_context returns a composed memory packet plus the
 // server-verified context envelope, not a bare memory list.
 export const getContextOutputSchema = z.object({
   packet: memoryPacketSchema,
@@ -101,7 +101,7 @@ export const retrieveMemoryInputSchema = z
     query: z.string().trim().min(1).max(500).optional(),
     limit: retrievalLimitSchema,
     // When true, retrieval also surfaces superseded/expired history rows that are
-    // otherwise hard-filtered out (S3.1.2). Default false, backward compatible.
+    // otherwise hard-filtered out. Default false for backward compatibility.
     includeHistory: z.boolean().default(false),
   })
   .refine(
@@ -119,7 +119,7 @@ export const retrieveMemoryOutputSchema = z.object({
 export type RetrieveMemoryOutput = z.infer<typeof retrieveMemoryOutputSchema>;
 
 /**
- * v2 `search` intake tool (S1.2.3). A client-facing explicit-lookup surface that
+ * `search` intake tool. A client-facing explicit-lookup surface that
  * delegates to the lexical/semantic retrieval path. The portable contract
  * accepts scope and status filters; hosts document which filters their current
  * repository adapter applies.

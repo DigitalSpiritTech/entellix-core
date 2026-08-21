@@ -12,9 +12,8 @@ import type { MemoryStatus, MemoryType, RenderPolicy } from "@entellix/contracts
 import { describe, expect, it, vi } from "vitest";
 
 import { RETRIEVAL_CONFIG_V1 } from "../config.ts";
-// RED (S3.1.2): the pure fusion pipeline does not exist yet. These specs pin the
-// Postgres-free contract the developer must land in
-// `@entellix/core/retrieval/fusion`: RRF fusion (k from config), the
+// Verifies the Postgres-free contract in `@entellix/core/retrieval/fusion`: RRF
+// fusion (k from config), the
 // POST-fusion / PRE-boost hard filters (ACL — never a score input — plus
 // temporal validity and status), the boost stage (scope/entity/pin/per-type
 // recency decay), and the OFF-by-default rerank hook. Everything is a pure
@@ -566,7 +565,7 @@ describe("boosts apply AFTER filters and can only reorder survivors", () => {
   });
 });
 
-describe("maybeRerank (hook stubbed OFF by default)", () => {
+describe("maybeRerank (optional hook disabled by default)", () => {
   const candidates: FusedCandidate[] = [
     { id: "a", score: 0.9 },
     { id: "b", score: 0.8 },
@@ -638,9 +637,9 @@ describe("fuseAndRank (full pure pipeline)", () => {
   });
 });
 
-// RED (S4.2.1 relevance-gated retrieval): a new POST-fusion / PRE-boost pure
-// filter that drops candidates whose fused score is strictly below the config
-// floor, so off-topic noise is never surfaced even when the limit is under-filled.
+// Post-fusion, pre-boost relevance filtering drops candidates whose fused score
+// is strictly below the config floor, so off-topic noise is never surfaced even
+// when the limit is under-filled.
 describe("applyRelevanceFloor (drops below-floor candidates, POST-fusion PRE-boost)", () => {
   it("drops candidates scoring strictly below the floor and keeps the rest", () => {
     const out = applyRelevanceFloor({
@@ -779,9 +778,9 @@ describe("fuseAndRank applies the relevance floor (POST-fusion, PRE-boost)", () 
   });
 });
 
-// RED (semantic-distance relevance gate): the shipped RRF-rank floor can't
-// discriminate on a small corpus — the vector lane returns every memory as a
-// nearest neighbour, so every candidate clears the fused-score floor and nothing
+// Semantic-distance relevance gate: an RRF-rank floor cannot discriminate on a
+// small corpus because the vector lane returns every memory as a nearest
+// neighbour, so every candidate clears the fused-score floor and nothing
 // is trimmed. This gate instead bounds the actual semantic cosine DISTANCE from
 // the vector lane, while keeping exact lexical/entity matches (whose lanes are
 // already precise). It is a pure POST-fusion FILTER: never mutates scores, keeps

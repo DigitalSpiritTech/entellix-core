@@ -1,5 +1,5 @@
 /**
- * Implements extractor behavior for this TypeScript module.
+ * Extracts validated memory candidates from session batches through a model port.
  *
  * Inputs: Imported dependencies and values passed to the module's documented functions.
  * Outputs: Exported types, values, and behavior provided by the module.
@@ -32,12 +32,12 @@ export type {
 } from "@entellix/contracts/candidates";
 
 /**
- * Multi-candidate extractor (S2.1.3). Splits a session batch into 0..N candidate
- * memories with verbatim evidence spans, using a small model whose id + prompt
- * are injected as versioned CONFIG (never a hardcoded model call in logic — ADR
- * 0019). LLM output is Zod-validated and retried exactly once on invalid; a
+ * Multi-candidate extractor. Splits a session batch into zero or more candidate
+ * memories with verbatim evidence spans, using a small model whose identifier and
+ * prompt are injected as versioned configuration. Model output is Zod-validated
+ * and retried exactly once when invalid; a
  * second failure throws a typed error. Directive candidates are kept
- * byte-verbatim (no normalization at extraction — Decision 10). persistCandidates
+ * byte-verbatim with no normalization during extraction. persistCandidates
  * writes the result to `memory_candidates` via the service-role db.
  */
 
@@ -142,7 +142,7 @@ function parseCandidates(raw: string): ExtractedCandidate[] | null {
 }
 
 /**
- * Directive candidates are stored verbatim (Decision 10): the extractor refuses
+ * Directive candidates are stored verbatim: the extractor refuses
  * any paraphrase in `candidateText` and normalizes it to the (verbatim) evidence
  * span. Non-directive candidates pass through unchanged.
  *

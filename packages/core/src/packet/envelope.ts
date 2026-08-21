@@ -1,5 +1,5 @@
 /**
- * Implements envelope behavior for this TypeScript module.
+ * Verifies caller context envelopes against trusted membership resolution.
  *
  * Inputs: Imported dependencies and values passed to the module's documented functions.
  * Outputs: Exported types, values, and behavior provided by the module.
@@ -15,7 +15,7 @@ import type {
 } from "@entellix/contracts/packet";
 
 /**
- * Provider-neutral context-envelope verifier (S3.1.3). PURE. The ONLY trusted input
+ * Provider-neutral context-envelope verifier. The only trusted input
  * is the auth-derived `actorUserId`; the model-asserted org/entity ids are never
  * trusted. Membership resolution (injected) decides the org: an asserted org is
  * honoured only when the caller is an ACTIVE member of it, otherwise the

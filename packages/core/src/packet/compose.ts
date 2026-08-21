@@ -1,5 +1,5 @@
 /**
- * Implements compose behavior for this TypeScript module.
+ * Composes ordered, budget-aware memory packets from governed inputs.
  *
  * Inputs: Imported dependencies and values passed to the module's documented functions.
  * Outputs: Exported types, values, and behavior provided by the module.
@@ -30,7 +30,7 @@ export type {
 } from "@entellix/contracts/packet";
 
 /**
- * Pure memory-packet composer (S3.1.3). Renders the caller's in-effect
+ * Pure memory-packet composer. Renders the caller's in-effect
  * directives, profile, relevant memories, and procedures into a single packet
  * in the FIXED section order, dropping lower sections first to fit a token
  * budget. The directive block is rendered verbatim (via renderDirectiveBlock)

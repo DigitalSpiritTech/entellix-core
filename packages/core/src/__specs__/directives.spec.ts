@@ -21,7 +21,7 @@ import {
 } from "../directives.ts";
 
 /**
- * Core unit surface for S2.3.2 — the directive engine's PURE parts (no Postgres, no
+ * Unit surface for the directive engine's pure parts (no PostgreSQL and no
  * model). Exercises the creation gate truth table, the packet-block line cap +
  * ranked overflow, verbatim byte-equality of pinned content, and the row
  * invariant (canCreateDirective / buildDirectivePacketBlock /
@@ -35,7 +35,7 @@ import {
 const uuid = (n: number): string => `00000000-0000-4000-8000-${n.toString(16).padStart(12, "0")}`;
 
 // ---------------------------------------------------------------------------
-// canCreateDirective — creation gate truth table (Decisions 10, 18).
+// canCreateDirective — creation gate truth table.
 // ---------------------------------------------------------------------------
 
 /**
@@ -121,7 +121,7 @@ describe("canCreateDirective — creation gate truth table", () => {
 });
 
 // ---------------------------------------------------------------------------
-// buildDirectivePacketBlock — line cap + ranked overflow (PRD §9).
+// buildDirectivePacketBlock — line cap and ranked overflow.
 // ---------------------------------------------------------------------------
 
 /**
@@ -233,7 +233,7 @@ describe("buildDirectivePacketBlock — cap + overflow", () => {
 });
 
 // ---------------------------------------------------------------------------
-// buildDirectivePacketBlock — pinned content is byte-verbatim (Decision 10).
+// buildDirectivePacketBlock — pinned content is byte-verbatim.
 // ---------------------------------------------------------------------------
 
 const NASTY_BASES = [

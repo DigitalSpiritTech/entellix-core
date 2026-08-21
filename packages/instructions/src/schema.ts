@@ -1,5 +1,5 @@
 /**
- * Implements schema behavior for this TypeScript module.
+ * Defines validated per-client instruction-template pack contracts.
  *
  * Inputs: Imported dependencies and values passed to the module's documented functions.
  * Outputs: Exported types, values, and behavior provided by the module.
@@ -11,8 +11,8 @@
 import { z } from "zod";
 
 /**
- * S4.1.1 contract for the per-client instruction template pack. A template is
- * pure data describing how Entellix's recall/log/scope/summary instructions
+ * Defines the per-client instruction template pack contract. A template is pure
+ * data describing how Entellix's recall/log/scope/summary instructions
  * are packaged for one client surface. The packaged verification checklist
  * defines when a surface may be called validated. This module owns the schema
  * only — `templates.ts` supplies the content.

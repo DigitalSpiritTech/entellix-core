@@ -1,5 +1,5 @@
 /**
- * Implements eval exclusion behavior for this TypeScript module.
+ * Evaluates distractor exclusion without requiring persistence or provider access.
  *
  * Inputs: Imported dependencies and values passed to the module's documented functions.
  * Outputs: Exported types, values, and behavior provided by the module.
@@ -8,7 +8,7 @@
  * @packageDocumentation
  */
 
-// Pure merge-gate helper for the S4.2.3 distractor-exclusion contract.
+// Pure merge-gate helper for the distractor-exclusion contract.
 //
 // The retrieval eval harness needs a
 // Postgres-free, deterministic way to decide whether a single retrieval result

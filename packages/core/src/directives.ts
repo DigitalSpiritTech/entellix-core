@@ -1,5 +1,5 @@
 /**
- * Implements directives behavior for this TypeScript module.
+ * Enforces directive creation rules and composes pinned directive blocks.
  *
  * Inputs: Imported dependencies and values passed to the module's documented functions.
  * Outputs: Exported types, values, and behavior provided by the module.
@@ -29,23 +29,20 @@ export type {
 } from "@entellix/contracts/directives";
 
 /**
- * Directive-type core (S2.3.2). The pure directive engine: the creation gate,
+ * Directive-type core. The pure directive engine provides the creation gate,
  * the packet-block composer (line cap + ranked overflow), and the row-invariant
- * assertion that keeps directive/policy rows verbatim + pinned. Behavior is
- * pinned by the core directives spec (pure) and
- * pipeline/__specs__/directive-pipeline-property.spec.ts (full-pipeline byte
- * equality via fakes); the DB half of the invariant is a CHECK constraint the
- * developer adds by migration (see EXPECTED_DIRECTIVE_ROW_CONSTRAINT below) and
- * is exercised by test/pipeline-directives.test.ts.
+ * assertion that keeps directive and policy rows verbatim and pinned. The core
+ * directive specifications pin these pure rules. Host persistence adapters can
+ * enforce the matching database constraint named below.
  *
- * Nothing here mutates directive content — the verbatim carve-out (Decision 10)
- * is upheld end-to-end by the reconciler's `assertDirectiveByteEquality` (S2.2.4)
- * plus these guards.
+ * Nothing here mutates directive content. The verbatim rule is upheld end-to-end
+ * by the reconciler's `assertDirectiveByteEquality` plus these guards.
  */
 
 /**
- * The DB CHECK constraint the developer must add by migration to enforce the
- * row invariant in Postgres (the code half is `assertDirectiveRowInvariant`).
+ * Name reserved for a database CHECK constraint that host adapters can use to
+ * enforce the row invariant in PostgreSQL. The code half is
+ * `assertDirectiveRowInvariant`.
  * Documented here so the migration and the code stay in lockstep:
  *
  *   ALTER TABLE memories ADD CONSTRAINT memories_verbatim_type_shape_check
@@ -64,7 +61,7 @@ export type {
 export const EXPECTED_DIRECTIVE_ROW_CONSTRAINT = "memories_verbatim_type_shape_check";
 
 /**
- * Creation gate (Decisions 10, 18). PURE encoding, no I/O:
+ * Pure creation gate with no I/O:
  *   - `via: 'review_ui'` → allowed (the trusted human creation path).
  *   - `via: 'pipeline'` + `first_party` + `isFirstPersonExplicit` → allowed
  *     (the automatic path is still subject to the policy matrix downstream).
@@ -87,7 +84,7 @@ export function canCreateDirective(ctx: DirectiveCreationContext): CanCreateDire
   // Pipeline path: only a first-party, first-person explicit standing rule may be
   // created without review. Everything else (external/integration trust, or a
   // first-party but non-first-person/ambient statement) is forced to review —
-  // never silently created, never silently dropped (Decisions 10, 18).
+  // never silently created and never silently dropped.
   if (ctx.sourceTrustClass === "first_party" && ctx.isFirstPersonExplicit) {
     return {
       allowed: true,
@@ -104,7 +101,7 @@ export function canCreateDirective(ctx: DirectiveCreationContext): CanCreateDire
 }
 
 /**
- * Compose the pinned directive block for a packet (PRD §9). PURE:
+ * Compose the pinned directive block for a packet. Pure behavior:
  *   - directives are considered in ascending `precedenceRank` (best first);
  *   - pinned VERBATIM (content byte-for-byte) until the TOTAL CONTENT-LINE count
  *     across pinned directives would exceed `cap` (default 15) — a multi-line
@@ -133,7 +130,7 @@ export function buildDirectivePacketBlock(
   let overflowing = false;
   for (const directive of ordered) {
     // A multi-line directive consumes as many lines as it has. Content is pinned
-    // VERBATIM — byte-for-byte, never trimmed or canonicalized (Decision 10).
+    // VERBATIM — byte-for-byte, never trimmed or canonicalized.
     const lineCount = directive.content.split("\n").length;
     if (overflowing || usedLines + lineCount > cap) {
       // Once a directive does not fit, it and every lower-precedence directive
@@ -162,7 +159,7 @@ export function buildDirectivePacketBlock(
 }
 
 /**
- * Code-level half of the directive/policy row invariant (Decision 10, 17). Throws
+ * Code-level half of the directive and policy row invariant. Throws
  * unless the row's (contentVerbatim, renderPolicy) match TYPE_DERIVED_POLICIES
  * for its type: for a verbatim type (directive/policy) contentVerbatim MUST be
  * true AND renderPolicy MUST be 'pinned'; a non-verbatim type MUST NOT claim

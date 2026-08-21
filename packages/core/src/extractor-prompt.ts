@@ -1,5 +1,5 @@
 /**
- * Implements extractor prompt behavior for this TypeScript module.
+ * Provides the versioned model prompt for multi-candidate extraction.
  *
  * Inputs: Imported dependencies and values passed to the module's documented functions.
  * Outputs: Exported types, values, and behavior provided by the module.
@@ -11,7 +11,7 @@
 import type { ExtractorEvent } from "./extractor.ts";
 
 /**
- * Extractor prompt — versioned CONFIG, not code (S2.1.3, ADR 0019). The prompt
+ * Extractor prompt — versioned configuration rather than executable logic. The prompt
  * text and the model id are the two tunable knobs of the extractor; keeping the
  * prompt here (behind {@link EXTRACTOR_PROMPT_VERSION}, re-exported from
  * `@entellix/contracts/candidates`) means a prompt change is an auditable config

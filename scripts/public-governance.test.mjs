@@ -1,12 +1,34 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readdir, readFile, stat } from "node:fs/promises";
 import test from "node:test";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
+const generatedDirectoryNames = new Set([
+  ".git",
+  ".mastra",
+  ".turbo",
+  "artifacts",
+  "dist",
+  "node_modules",
+]);
 
 const readRepositoryFile = (path) => readFile(join(repositoryRoot, path), "utf8");
+
+const listRepositoryFiles = async (directory) => {
+  const entries = await readdir(join(repositoryRoot, directory), { withFileTypes: true });
+  const paths = await Promise.all(
+    entries
+      .filter((entry) => !generatedDirectoryNames.has(entry.name))
+      .map((entry) => {
+        const path = join(directory, entry.name);
+        return entry.isDirectory() ? listRepositoryFiles(path) : [path];
+      }),
+  );
+
+  return paths.flat();
+};
 
 test("landing page exposes public beta status and governance paths", async () => {
   const readme = await readRepositoryFile("README.md");
@@ -80,43 +102,59 @@ test("agent context records the completed public beta release", async () => {
 });
 
 test("operational documentation follows current repository versions", async () => {
-  const [readme, rootManifestText, standaloneManifestText, bugTemplate] = await Promise.all([
-    readRepositoryFile("README.md"),
-    readRepositoryFile("package.json"),
-    readRepositoryFile("apps/standalone/package.json"),
-    readRepositoryFile(".github/ISSUE_TEMPLATE/bug_report.yml"),
-  ]);
+  const [readme, standaloneReadme, rootManifestText, standaloneManifestText, bugTemplate] =
+    await Promise.all([
+      readRepositoryFile("README.md"),
+      readRepositoryFile("apps/standalone/README.md"),
+      readRepositoryFile("package.json"),
+      readRepositoryFile("apps/standalone/package.json"),
+      readRepositoryFile(".github/ISSUE_TEMPLATE/bug_report.yml"),
+    ]);
   const rootManifest = JSON.parse(rootManifestText);
   const standaloneManifest = JSON.parse(standaloneManifestText);
   const pnpmVersion = rootManifest.packageManager.replace("pnpm@", "");
 
   assert.match(readme, new RegExp(`pnpm ${pnpmVersion.replaceAll(".", "\\.")}`));
+  assert.ok(standaloneReadme.includes(pnpmVersion), "standalone README has a stale pnpm version");
   assert.match(bugTemplate, new RegExp(standaloneManifest.version.replaceAll(".", "\\.")));
 });
 
 test("source documentation contains no completed implementation placeholders", async () => {
-  const paths = [
-    "packages/contracts/src/candidates.ts",
-    "packages/contracts/src/conflicts.ts",
-    "packages/contracts/src/reconciler.ts",
-    "packages/core/src/policy-matrix.ts",
-    "packages/core/src/reconciler.ts",
-    "packages/core/src/__specs__/classifier.spec.ts",
-    "packages/core/src/__specs__/conflicts.spec.ts",
-    "packages/core/src/__specs__/directive-precedence.spec.ts",
-    "packages/core/src/__specs__/extractor.spec.ts",
-    "packages/core/src/__specs__/policy-matrix.spec.ts",
-    "packages/core/src/__specs__/reconciler.spec.ts",
-    "packages/instructions/docs/verification-checklist.md",
-    "packages/instructions/src/schema.ts",
-  ];
+  const paths = (await Promise.all([listRepositoryFiles("packages"), listRepositoryFiles("apps")]))
+    .flat()
+    .filter((path) => /(?:\.ts|\.md)$/.test(path) && !path.endsWith("CHANGELOG.md"));
   const sources = await Promise.all(paths.map(readRepositoryFile));
 
   for (const [index, source] of sources.entries()) {
     assert.doesNotMatch(
       source,
-      /RED phase|not implemented:|TODO-SWAP|TODO\(S\d|ai\/testing\.md|ai\/platforms\/index\.md|docs\/runbooks\//,
+      /Implements .* behavior for this TypeScript module|\bRED\b|does not exist yet|not implemented:|TODO-SWAP|TODO\(S\d|\bS\d+\.\d+(?:\.\d+)?\b|Sprint\s+\d|PRD\s*§|\bDecisions?\s+\d|\bADR\s+\d+|\bAC:|Core invariant|ClickUp|future .* CLI|still awaits|pnpm eval:retrieval|pipeline\/__specs__\/directive-pipeline-property\.spec\.ts|test\/pipeline-directives\.test\.ts|ai\/testing\.md|ai\/platforms\/index\.md|docs\/runbooks\//,
       paths[index],
     );
   }
+});
+
+test("Markdown documentation has valid local link targets", async () => {
+  const paths = (await listRepositoryFiles(".")).filter((path) => path.endsWith(".md"));
+
+  await Promise.all(
+    paths.map(async (path) => {
+      const source = await readRepositoryFile(path);
+      const links = [...source.matchAll(/\[[^\]]*\]\(([^)]+)\)/g)];
+
+      await Promise.all(
+        links.map(async (match) => {
+          const target = match[1].split("#", 1)[0];
+          if (!target || /^(?:https?:|mailto:)/.test(target) || target.includes("<")) {
+            return;
+          }
+
+          await assert.doesNotReject(
+            stat(join(repositoryRoot, dirname(path), decodeURIComponent(target))),
+            `${path} links to missing local target ${match[1]}`,
+          );
+        }),
+      );
+    }),
+  );
 });

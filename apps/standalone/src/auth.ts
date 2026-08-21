@@ -1,5 +1,5 @@
 /**
- * Implements auth behavior for this TypeScript module.
+ * Validates bearer credentials at standalone HTTP and MCP boundaries.
  *
  * Inputs: Imported dependencies and values passed to the module's documented functions.
  * Outputs: Exported types, values, and behavior provided by the module.

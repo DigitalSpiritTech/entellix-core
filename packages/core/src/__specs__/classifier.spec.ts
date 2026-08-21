@@ -29,7 +29,7 @@ import {
 } from "../classifier.ts";
 
 /**
- * Unit surface for S2.2.1 — the classifier suite. Exercises the classifier
+ * Unit surface for the classifier suite. Exercises the classifier
  * factory in isolation with FAKE dependencies (generate(), resolveEntityFn,
  * listMembershipsFn all injected) and hand-built candidate rows, so these must
  * NOT touch Postgres, an HTTP server, or a real model. These assertions pin the

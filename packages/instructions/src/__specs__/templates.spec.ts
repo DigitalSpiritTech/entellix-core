@@ -27,10 +27,7 @@ import {
   getInstructionTemplate,
 } from "../templates.ts";
 
-// S4.1.1 RED spec: this asserts the full behavioral contract for the
-// per-client instruction template pack. It fails against the stub in
-// templates.ts until a developer fills in real content — see that file's
-// module doc for the intended export shape.
+// Behavioral contract for the shipped per-client instruction template pack.
 
 const PACKAGE_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 

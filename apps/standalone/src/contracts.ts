@@ -1,5 +1,5 @@
 /**
- * Implements contracts behavior for this TypeScript module.
+ * Defines runtime schemas for standalone operator requests and responses.
  *
  * Inputs: Imported dependencies and values passed to the module's documented functions.
  * Outputs: Exported types, values, and behavior provided by the module.

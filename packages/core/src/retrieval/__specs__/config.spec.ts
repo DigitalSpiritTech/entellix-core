@@ -10,13 +10,9 @@
 
 import { describe, expect, it } from "vitest";
 
-// RED (S3.1.2 DoD "adjustment config documented (versioned)"): the versioned
-// retrieval config module does not exist yet. This pins the shape and the
-// load-bearing values of `RETRIEVAL_CONFIG_V1` and its Zod validator so the
-// fusion pipeline reads tunables from ONE audited, versioned place rather than
-// scattered magic numbers. Import fails until
-// `@entellix/core/retrieval/config` exports `RETRIEVAL_CONFIG_V1` and
-// `retrievalConfigSchema`.
+// Verifies the shape and load-bearing values of `RETRIEVAL_CONFIG_V1` and its
+// Zod validator so the fusion pipeline reads tunables from one audited,
+// versioned place rather than scattered magic numbers.
 import { RETRIEVAL_CONFIG_V1, retrievalConfigSchema } from "../config.ts";
 
 /**
@@ -37,7 +33,7 @@ import { RETRIEVAL_CONFIG_V1, retrievalConfigSchema } from "../config.ts";
  *       // per memory-type recency half-life in ms; null == no recency decay.
  *       // task_state decays fast (small half-life), fact decays slow (large
  *       // half-life), directive has none (null).
- *     rerankEnabled: false,            // rerank hook stubbed OFF by default
+ *     rerankEnabled: false,            // optional rerank hook disabled by default
  *   }
  */
 describe("RETRIEVAL_CONFIG_V1", () => {
@@ -79,7 +75,7 @@ describe("RETRIEVAL_CONFIG_V1", () => {
     expect(RETRIEVAL_CONFIG_V1.recencyHalfLifeMsByType.directive).toBeNull();
   });
 
-  // Sprint 4.3 calibrates the semantic-distance gate against the expanded
+  // Fixture calibration checks the semantic-distance gate against the expanded
   // Voyage-backed fixture set. A tuning change is auditable only with a bumped
   // config version and the fixture-preserving bound pinned here.
   it("bumps the version tag to retrieval-config-v4", () => {

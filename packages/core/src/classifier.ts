@@ -1,5 +1,5 @@
 /**
- * Implements classifier behavior for this TypeScript module.
+ * Classifies memory candidates through validated provider-neutral model output.
  *
  * Inputs: Imported dependencies and values passed to the module's documented functions.
  * Outputs: Exported types, values, and behavior provided by the module.
@@ -46,11 +46,11 @@ export type {
 } from "@entellix/contracts/classification";
 
 /**
- * Classifier suite (S2.2.1). Classifies one candidate along every governance
+ * Classifier suite. Classifies one candidate along every governance
  * axis in a single workflow: type, owner (binary, with a multi-scope
  * distribution when uncertain), entity links, audience, sensitivity, confidence,
  * and an operation guess. Scope is Entellix's decision, never the host model's —
- * `active_org_id` is a context signal only, never a default owner (Decision 4/5).
+ * `active_org_id` is a context signal only, never a default owner.
  *
  * Model + prompt are injected as versioned CONFIG (never a hardcoded model call).
  * The raw LLM output is Zod-validated against classifierLlmOutputSchema and
@@ -133,7 +133,7 @@ export function isClassifierError(value: unknown): value is ClassifierError {
   );
 }
 
-/** event trust class → the source authority carried onto the memory (Decision 16). */
+/** Maps event trust class to the source authority carried onto the memory. */
 const SOURCE_AUTHORITY_BY_TRUST: Record<SourceTrustClass, SourceAuthority> = {
   first_party: "explicit",
   external_included: "inferred",

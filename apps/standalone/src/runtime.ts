@@ -1,5 +1,5 @@
 /**
- * Implements runtime behavior for this TypeScript module.
+ * Composes validated configuration, providers, storage, services, and workers.
  *
  * Inputs: Imported dependencies and values passed to the module's documented functions.
  * Outputs: Exported types, values, and behavior provided by the module.

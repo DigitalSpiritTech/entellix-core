@@ -18,9 +18,8 @@ import type { EnvelopeMembership } from "@entellix/contracts/packet";
 import { describe, expect, it } from "vitest";
 
 import { renderDirectiveBlock } from "../../directive-precedence.ts";
-// RED (S3.1.3): the pure memory-packet composer + the server-side envelope
-// verifier do not exist yet. These specs pin the Postgres-free contract the
-// developer must land:
+// Verifies the Postgres-free contract for the pure memory-packet composer and
+// server-side envelope verifier:
 //   - `compose.ts` — composeMemoryPacket (pure), the char-based default token
 //     estimator, and the packet header strings.
 //   - `envelope.ts` — verifyContextEnvelope (pure),
@@ -643,8 +642,8 @@ describe("verifyContextEnvelope — SERVER-verified, model assertions never trus
   });
 });
 
-// RED (S4.2.2): the composer gains an always-on `pinned` governance slice.
-// `get_context` must ALWAYS surface pinned (non-directive) governance memories on
+// The composer includes an always-on `pinned` governance slice. `get_context`
+// must always surface pinned non-directive governance memories on
 // the first call regardless of query similarity, WITHOUT crowding out query
 // recall. The slice behaves like the directive block (never truncated away) but
 // carries its OWN sub-budget so a large pinned list can't starve `memories`.
@@ -658,7 +657,7 @@ const pinnedGovernance: RetrievedMemoryInput[] = [
   { memoryId: PIN_B, memoryType: "preference", text: "Never share source evidence externally." },
 ];
 
-describe("composeMemoryPacket — always-on pinned governance slice (S4.2.2)", () => {
+describe("composeMemoryPacket — always-on pinned governance slice", () => {
   it("always renders the pinned slice — even at a zero budget that drops every other section", () => {
     const packet = composeMemoryPacket({
       ...fullInput({ tokenBudget: 0 }),

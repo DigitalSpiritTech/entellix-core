@@ -1,5 +1,5 @@
 /**
- * Implements data rights behavior for this TypeScript module.
+ * Defines portable export, retention, and deletion contracts with integrity metadata.
  *
  * Inputs: Imported dependencies and values passed to the module's documented functions.
  * Outputs: Exported types, values, and behavior provided by the module.
