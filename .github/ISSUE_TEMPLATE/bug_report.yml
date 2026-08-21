@@ -21,7 +21,7 @@ body:
     id: version
     attributes:
       label: Version or commit
-      placeholder: "0.1.2 or a full commit SHA"
+      placeholder: "Latest published version or a full commit SHA"
     validations:
       required: true
   - type: textarea

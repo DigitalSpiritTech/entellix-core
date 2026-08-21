@@ -102,21 +102,23 @@ test("agent context records the completed public beta release", async () => {
 });
 
 test("operational documentation follows current repository versions", async () => {
-  const [readme, standaloneReadme, rootManifestText, standaloneManifestText, bugTemplate] =
-    await Promise.all([
-      readRepositoryFile("README.md"),
-      readRepositoryFile("apps/standalone/README.md"),
-      readRepositoryFile("package.json"),
-      readRepositoryFile("apps/standalone/package.json"),
-      readRepositoryFile(".github/ISSUE_TEMPLATE/bug_report.yml"),
-    ]);
+  const [readme, standaloneReadme, rootManifestText, bugTemplate] = await Promise.all([
+    readRepositoryFile("README.md"),
+    readRepositoryFile("apps/standalone/README.md"),
+    readRepositoryFile("package.json"),
+    readRepositoryFile(".github/ISSUE_TEMPLATE/bug_report.yml"),
+  ]);
   const rootManifest = JSON.parse(rootManifestText);
-  const standaloneManifest = JSON.parse(standaloneManifestText);
   const pnpmVersion = rootManifest.packageManager.replace("pnpm@", "");
 
   assert.match(readme, new RegExp(`pnpm ${pnpmVersion.replaceAll(".", "\\.")}`));
   assert.ok(standaloneReadme.includes(pnpmVersion), "standalone README has a stale pnpm version");
-  assert.match(bugTemplate, new RegExp(standaloneManifest.version.replaceAll(".", "\\.")));
+  assert.match(bugTemplate, /Latest published version or a full commit SHA/i);
+  assert.doesNotMatch(
+    bugTemplate,
+    /placeholder:\s*["']?\d+\.\d+\.\d+/,
+    "bug report template must not pin a release version",
+  );
 });
 
 test("source documentation contains no completed implementation placeholders", async () => {
