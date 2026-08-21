@@ -1,12 +1,21 @@
+/**
+ * Tests eval exclusion behavior.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import { describe, expect, it } from "vitest";
 
-// RED (S4.2.3 distractor-exclusion merge gate): the pure merge-gate helper does
-// not exist yet. These specs pin the Postgres-free contract the developer must
-// live in `@entellix/core/retrieval/eval-exclusion`. Any host evaluation harness
+// Verifies the Postgres-free distractor-exclusion merge-gate contract in
+// `@entellix/core/retrieval/eval-exclusion`. Any host evaluation harness
 // can delegate its three merge-gate assertions to this one pure function so the
 // distractor-exclusion contract is provable without a DB or provider API key.
 //
-// The three merge-gate assertions (per the ClickUp story) are:
+// The three merge-gate assertions are:
 //   (1) an off-topic memory below the floor is DROPPED (never returned),
 //   (2) pinned/directive governance rows STILL SURFACE, and
 //   (3) relevant recall is NOT regressed (expected memories still present).

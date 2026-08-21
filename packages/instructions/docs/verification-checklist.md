@@ -2,10 +2,9 @@
 
 Manual, human-run checklist (Ted) to confirm each per-client instruction
 template actually drives Entellix recall/log behavior on the live platform.
-Per `ai/platforms/index.md` "Platform Claim Rules", a template is only
-considered validated for a surface after the steps below pass in a real session
-on that surface. Codex sessions are a proxy example only and do not validate
-Claude Code.
+A template is only considered validated for a surface after the steps below
+pass in a real session on that surface. Evidence from one client is a proxy
+example only and never validates another client.
 
 ## Per-client procedure
 
@@ -18,7 +17,7 @@ Run this for each client: `claude-code`, `codex`, `claude-desktop`, `cowork`,
 2. **Install the block.**
    - Managed-block clients (`claude-code`, `codex`): insert the template body
      into `CLAUDE.md` / `AGENTS.md` between the `<!-- entellix:begin -->` and
-     `<!-- entellix:end -->` markers (or via `entellix init` once S4.1.2 ships).
+     `<!-- entellix:end -->` markers.
      Confirm the markers are present and the block is inside them.
    - Copy-paste clients (`claude-desktop`, `cowork`, `chatgpt`): paste the body
      into the project / custom instructions field per the setup guide.

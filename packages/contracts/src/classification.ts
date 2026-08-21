@@ -1,3 +1,13 @@
+/**
+ * Defines validated governance classifications for extracted memory candidates.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import { z } from "zod";
 
 import { memoryCandidateSchema } from "./candidates.ts";
@@ -12,11 +22,11 @@ import {
 } from "./memory-v2.ts";
 
 /**
- * Classifier-suite contracts (S2.2.1). Every candidate is classified along all
+ * Classifier-suite contracts. Every candidate is classified along all
  * governance axes in one workflow — type, owner, entity links, audience,
  * sensitivity, confidence, and an operation guess. Scope is ENTELLIX's decision,
  * never the host model's: `active_org_id` is a context signal only, never a
- * default owner (Decision 4/5), so owner + a multi-scope `scopeDistribution` come
+ * default owner, so owner plus a multi-scope `scopeDistribution` come
  * from the classifier's own reasoning, not from the caller's active org.
  *
  * Two shapes, deliberately distinct:
@@ -46,7 +56,7 @@ export const AUDIENCE_BASIS_MAX_LENGTH = 280;
 
 /**
  * The reconciler operation the classifier GUESSES for a candidate. Same eight
- * verbs as the reconciler executes (S2.2.4) plus REVIEW/NOOP as terminal routes;
+ * verbs the reconciler executes plus REVIEW/NOOP as terminal routes;
  * the guess is advisory — conflict detection + the policy matrix refine it.
  */
 export const OPERATION_GUESSES = [
@@ -65,7 +75,7 @@ export type OperationGuess = z.infer<typeof operationGuessSchema>;
 /** A probability/confidence in [0, 1]. */
 const confidenceSchema = z.number().min(0).max(1);
 
-/** Owner call with its confidence. `value` is binary user|org (Decision 4). */
+/** Owner call with its confidence. `value` is binary user or organization. */
 export const ownerAssessmentSchema = z.object({
   value: ownerScopeTypeSchema,
   confidence: confidenceSchema,
@@ -76,7 +86,7 @@ export type OwnerAssessment = z.infer<typeof ownerAssessmentSchema>;
  * One entry of the multi-scope owner distribution. A confident classification
  * emits a single entry (matching `owner.value`); an uncertain one emits both
  * user and org with confidences that sum to ≈1 — a distribution, never a point
- * guess (AC: "ambiguous-scope cases produce distributions not point guesses").
+ * guess, so ambiguous scope produces a distribution rather than a point guess.
  */
 export const scopeDistributionEntrySchema = z.object({
   owner: ownerScopeTypeSchema,

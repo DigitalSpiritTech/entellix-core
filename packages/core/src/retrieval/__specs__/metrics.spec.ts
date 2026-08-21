@@ -1,11 +1,18 @@
+/**
+ * Tests metrics behavior.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import { describe, expect, it } from "vitest";
 
-// RED (S3.1.1 DoD "per-lane hit-contribution metric emitted"): the metrics
-// module does not exist yet. This pins the PURE aggregator that maps the fused
-// (finally returned) memory ids + each lane's candidate ids to per-lane
-// contribution counts, so the emitted metric is provable without Postgres.
-// Import fails until `@entellix/core/retrieval/metrics` exports
-// `laneHitContributions`.
+// Verifies the pure aggregator that maps the fused, finally returned memory ids
+// plus each lane's candidate ids to per-lane contribution counts, so the emitted
+// metric is provable without PostgreSQL.
 import { laneHitContributions } from "../metrics.ts";
 
 /**

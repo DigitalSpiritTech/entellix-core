@@ -1,3 +1,13 @@
+/**
+ * Fuses retrieval lanes, enforces visibility, and applies relevance ranking.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import type { MemoryStatus, MemoryType } from "@entellix/contracts";
 import type {
   FusedCandidate,
@@ -37,6 +47,11 @@ const HISTORY_STATUSES = new Set<MemoryStatus>(["superseded", "expired"]);
  * Reciprocal Rank Fusion. Each lane contributes `1 / (k + rank)` per candidate;
  * scores sum across lanes so a candidate surfaced by more lanes outranks a
  * single-lane one at the same rank. Ties keep first-seen order (stable).
+ *
+ * @param lanes - Value supplied for `lanes`.
+ * @param opts - Value supplied for `opts`.
+ * @returns The result produced by `rrfFuse`.
+ * @throws Errors raised by validation or dependent operations.
  */
 export function rrfFuse(
   lanes: readonly (readonly Candidate[])[],
@@ -53,6 +68,14 @@ export function rrfFuse(
   return order.map((id) => ({ id, score: scores.get(id)! })).toSorted((a, b) => b.score - a.score);
 }
 
+/**
+ * Executes status allowed.
+ *
+ * @param status - Value supplied for `status`.
+ * @param includeHistory - Value supplied for `includeHistory`.
+ * @returns The result produced by `statusAllowed`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function statusAllowed(status: MemoryStatus, includeHistory: boolean): boolean {
   if (status === "active") return true;
   return includeHistory && HISTORY_STATUSES.has(status);
@@ -67,6 +90,10 @@ function statusAllowed(status: MemoryStatus, includeHistory: boolean): boolean {
  *  - has `validTo <= now` (unless `includeHistory`),
  *  - has `validFrom > now` (never surfaced, even with history).
  * Survivors keep their incoming (fused) order.
+ *
+ * @param input - Value supplied for `input`.
+ * @returns The result produced by `applyHardFilters`.
+ * @throws Errors raised by validation or dependent operations.
  */
 export function applyHardFilters(input: {
   candidates: readonly FusedCandidate[];
@@ -100,6 +127,10 @@ export function applyHardFilters(input: {
  * `0` (or negative) is a no-op passthrough. Always-on pinned/directive governance
  * is NOT rescued here — it is handled separately by the packet composer, not by
  * surviving this floor.
+ *
+ * @param input - Value supplied for `input`.
+ * @returns The result produced by `applyRelevanceFloor`.
+ * @throws Errors raised by validation or dependent operations.
  */
 export function applyRelevanceFloor(input: {
   candidates: readonly FusedCandidate[];
@@ -119,6 +150,10 @@ export function applyRelevanceFloor(input: {
  * distance is dropped). Like applyHardFilters it is a FILTER: it never mutates
  * scores and preserves the incoming order. Always-on
  * pinned/directive governance is NOT rescued here — the packet composer owns that.
+ *
+ * @param input - Value supplied for `input`.
+ * @returns The result produced by `applySemanticDistanceGate`.
+ * @throws Errors raised by validation or dependent operations.
  */
 export function applySemanticDistanceGate(input: {
   candidates: readonly FusedCandidate[];
@@ -138,6 +173,10 @@ export function applySemanticDistanceGate(input: {
  * Per-type recency contribution: `recency * 0.5^(ageMs / halfLife)`. A `null`
  * half-life (or unknown/null type) yields no recency boost, so time-invariant
  * types (directives) are unaffected by age.
+ *
+ * @param input - Value supplied for `input`.
+ * @returns The result produced by `recencyBoost`.
+ * @throws Errors raised by validation or dependent operations.
  */
 export function recencyBoost(input: {
   memoryType: MemoryType | null;
@@ -151,6 +190,14 @@ export function recencyBoost(input: {
   return config.boosts.recency * Math.pow(0.5, ageMs / halfLife);
 }
 
+/**
+ * Executes scope matches.
+ *
+ * @param memory - Value supplied for `memory`.
+ * @param envelope - Value supplied for `envelope`.
+ * @returns The result produced by `scopeMatches`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function scopeMatches(memory: FusionMemory, envelope: ContextEnvelope): boolean {
   return (
     envelope.ownerScopeType !== undefined &&
@@ -160,6 +207,14 @@ function scopeMatches(memory: FusionMemory, envelope: ContextEnvelope): boolean 
   );
 }
 
+/**
+ * Executes entity matches.
+ *
+ * @param memory - Value supplied for `memory`.
+ * @param envelope - Value supplied for `envelope`.
+ * @returns The result produced by `entityMatches`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function entityMatches(memory: FusionMemory, envelope: ContextEnvelope): boolean {
   return (
     memory.subjectEntityId !== null &&
@@ -167,6 +222,16 @@ function entityMatches(memory: FusionMemory, envelope: ContextEnvelope): boolean
   );
 }
 
+/**
+ * Executes boost for.
+ *
+ * @param memory - Value supplied for `memory`.
+ * @param envelope - Value supplied for `envelope`.
+ * @param config - Value supplied for `config`.
+ * @param now - Value supplied for `now`.
+ * @returns The result produced by `boostFor`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function boostFor(
   memory: FusionMemory,
   envelope: ContextEnvelope,
@@ -189,6 +254,10 @@ function boostFor(
  * Additive boost stage applied AFTER filtering: scope/entity/pin/recency only
  * REORDER the survivors (stable on ties). A boost can never resurrect a
  * filtered-out row because it only ever sees the post-filter candidate set.
+ *
+ * @param input - Value supplied for `input`.
+ * @returns The result produced by `applyBoosts`.
+ * @throws Errors raised by validation or dependent operations.
  */
 export function applyBoosts(input: {
   candidates: readonly FusedCandidate[];
@@ -212,7 +281,11 @@ export function applyBoosts(input: {
 /**
  * Rerank hook seam. Identity unless `config.rerankEnabled` is explicitly true AND
  * a `rerank` fn is supplied. When disabled it MUST NOT invoke `rerank` (no
- * reranker on the normal path — Decision 20).
+ * reranker on the normal path).
+ *
+ * @param input - Value supplied for `input`.
+ * @returns The result produced by `maybeRerank`.
+ * @throws Errors raised by validation or dependent operations.
  */
 export function maybeRerank(input: {
   candidates: readonly FusedCandidate[];
@@ -232,6 +305,10 @@ export function maybeRerank(input: {
  * dropped for low raw relevance. The gate derives its inputs from the lane
  * convention `lanes[0]` = semantic (carries `distance`), `lanes[1]` = lexical,
  * `lanes[2]` = entity.
+ *
+ * @param input - Value supplied for `input`.
+ * @returns The result produced by `fuseAndRank`.
+ * @throws Errors raised by validation or dependent operations.
  */
 export function fuseAndRank(input: {
   lanes: readonly (readonly Candidate[])[];

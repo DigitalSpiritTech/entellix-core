@@ -1,3 +1,13 @@
+/**
+ * Tests directives behavior.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import type { SourceTrustClass } from "@entellix/contracts";
 import type { DirectiveCreationContext } from "@entellix/contracts/directives";
 import { DIRECTIVE_PACKET_CAP_DEFAULT } from "@entellix/contracts/directives";
@@ -11,19 +21,30 @@ import {
 } from "../directives.ts";
 
 /**
- * Core unit surface for S2.3.2 — the directive engine's PURE parts (no Postgres, no
+ * Unit surface for the directive engine's pure parts (no PostgreSQL and no
  * model). Exercises the creation gate truth table, the packet-block line cap +
  * ranked overflow, verbatim byte-equality of pinned content, and the row
  * invariant (canCreateDirective / buildDirectivePacketBlock /
  * assertDirectiveRowInvariant).
+ *
+ * @param n - Value supplied for `n`.
+ * @returns The result produced by `uuid`.
+ * @throws Errors raised by validation or dependent operations.
  */
 
 const uuid = (n: number): string => `00000000-0000-4000-8000-${n.toString(16).padStart(12, "0")}`;
 
 // ---------------------------------------------------------------------------
-// canCreateDirective — creation gate truth table (Decisions 10, 18).
+// canCreateDirective — creation gate truth table.
 // ---------------------------------------------------------------------------
 
+/**
+ * Executes ctx.
+ *
+ * @param overrides - Value supplied for `overrides`.
+ * @returns The result produced by `ctx`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function ctx(overrides: Partial<DirectiveCreationContext> = {}): DirectiveCreationContext {
   return {
     via: "pipeline",
@@ -100,9 +121,17 @@ describe("canCreateDirective — creation gate truth table", () => {
 });
 
 // ---------------------------------------------------------------------------
-// buildDirectivePacketBlock — line cap + ranked overflow (PRD §9).
+// buildDirectivePacketBlock — line cap and ranked overflow.
 // ---------------------------------------------------------------------------
 
+/**
+ * Executes directive.
+ *
+ * @param rank - Value supplied for `rank`.
+ * @param overrides - Value supplied for `overrides`.
+ * @returns The result produced by `directive`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function directive(
   rank: number,
   overrides: Partial<DirectivePacketDirectiveInput> = {},
@@ -116,7 +145,12 @@ function directive(
   };
 }
 
-/** Total content-line count across a set of pinned entries. */
+/** Total content-line count across a set of pinned entries.
+ *
+ * @param contents - Value supplied for `contents`.
+ * @returns The result produced by `countLines`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function countLines(contents: string[]): number {
   return contents.reduce((sum, content) => sum + content.split("\n").length, 0);
 }
@@ -199,7 +233,7 @@ describe("buildDirectivePacketBlock — cap + overflow", () => {
 });
 
 // ---------------------------------------------------------------------------
-// buildDirectivePacketBlock — pinned content is byte-verbatim (Decision 10).
+// buildDirectivePacketBlock — pinned content is byte-verbatim.
 // ---------------------------------------------------------------------------
 
 const NASTY_BASES = [

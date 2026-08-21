@@ -1,3 +1,13 @@
+/**
+ * Classifies memory candidates through validated provider-neutral model output.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import type {
   AudiencePolicyKind,
   MemoryType,
@@ -36,11 +46,11 @@ export type {
 } from "@entellix/contracts/classification";
 
 /**
- * Classifier suite (S2.2.1). Classifies one candidate along every governance
+ * Classifier suite. Classifies one candidate along every governance
  * axis in a single workflow: type, owner (binary, with a multi-scope
  * distribution when uncertain), entity links, audience, sensitivity, confidence,
  * and an operation guess. Scope is Entellix's decision, never the host model's —
- * `active_org_id` is a context signal only, never a default owner (Decision 4/5).
+ * `active_org_id` is a context signal only, never a default owner.
  *
  * Model + prompt are injected as versioned CONFIG (never a hardcoded model call).
  * The raw LLM output is Zod-validated against classifierLlmOutputSchema and
@@ -66,6 +76,13 @@ export interface ClassifierDeps {
 }
 
 export interface Classifier {
+  /**
+   * Executes classify candidate.
+   *
+   * @param input - Value supplied for `input`.
+   * @returns The result produced by `classifyCandidate`.
+   * @throws Errors raised by validation or dependent operations.
+   */
   classifyCandidate(input: ClassifyCandidateInput): Promise<ClassificationResult>;
 }
 
@@ -85,6 +102,15 @@ export interface ClassifierError extends Error {
   readonly attempts: number;
 }
 
+/**
+ * Creates classifier error.
+ *
+ * @param kind - Value supplied for `kind`.
+ * @param attempts - Value supplied for `attempts`.
+ * @param message - Value supplied for `message`.
+ * @returns The result produced by `createClassifierError`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 export function createClassifierError(
   kind: ClassifierErrorKind,
   attempts: number,
@@ -93,6 +119,13 @@ export function createClassifierError(
   return Object.assign(new Error(message), { kind, attempts } as const);
 }
 
+/**
+ * Determines whether classifier error.
+ *
+ * @param value - Value supplied for `value`.
+ * @returns The result produced by `isClassifierError`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 export function isClassifierError(value: unknown): value is ClassifierError {
   return (
     value instanceof Error &&
@@ -100,7 +133,7 @@ export function isClassifierError(value: unknown): value is ClassifierError {
   );
 }
 
-/** event trust class → the source authority carried onto the memory (Decision 16). */
+/** Maps event trust class to the source authority carried onto the memory. */
 const SOURCE_AUTHORITY_BY_TRUST: Record<SourceTrustClass, SourceAuthority> = {
   first_party: "explicit",
   external_included: "inferred",
@@ -127,6 +160,11 @@ const AUDIENCE_BASIS_MAX = 280;
  * over-call "directive"; we only keep it when an explicit standing-rule marker is
  * present in the candidate text or its evidence span. Otherwise we downgrade —
  * first-person wording lands on `preference`, everything else on `fact`.
+ *
+ * @param modelType - Value supplied for `modelType`.
+ * @param candidate - Value supplied for `candidate`.
+ * @returns The result produced by `resolveMemoryType`.
+ * @throws Errors raised by validation or dependent operations.
  */
 function resolveMemoryType(modelType: MemoryType, candidate: MemoryCandidate): MemoryType {
   if (modelType !== "directive") return modelType;
@@ -135,7 +173,12 @@ function resolveMemoryType(modelType: MemoryType, candidate: MemoryCandidate): M
   return FIRST_PERSON_PREFERENCE.test(candidate.candidateText) ? "preference" : "fact";
 }
 
-/** Clamps a heuristic basis string to the contract's max length. */
+/** Clamps a heuristic basis string to the contract's max length.
+ *
+ * @param text - Value supplied for `text`.
+ * @returns The result produced by `basis`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function basis(text: string): string {
   return text.length <= AUDIENCE_BASIS_MAX ? text : text.slice(0, AUDIENCE_BASIS_MAX);
 }
@@ -145,6 +188,12 @@ function basis(text: string): string {
  * model's `audienceHint`: project/client scoping wins, then first-person → owner,
  * then org-wide → org_members; otherwise the model's hint stands. `projectEntityId`
  * is attached only for a project_members suggestion whose project entity resolved.
+ *
+ * @param candidate - Value supplied for `candidate`.
+ * @param modelHint - Value supplied for `modelHint`.
+ * @param projectEntityId - Value supplied for `projectEntityId`.
+ * @returns The result produced by `suggestAudience`.
+ * @throws Errors raised by validation or dependent operations.
  */
 function suggestAudience(
   candidate: MemoryCandidate,
@@ -186,6 +235,12 @@ interface ResolvedMentions {
  * hit becomes an `entityLink` with the real id; anything unresolved (ambiguous or
  * no match, or no active org to resolve against) stays an `entityCreationCandidate`
  * — never a silent mint (Open Q7).
+ *
+ * @param output - Value supplied for `output`.
+ * @param activeOrgId - Value supplied for `activeOrgId`.
+ * @param resolveEntityFn - Value supplied for `resolveEntityFn`.
+ * @returns The result produced by `resolveMentions`.
+ * @throws Errors raised by validation or dependent operations.
  */
 async function resolveMentions(
   output: ClassifierLlmOutput,
@@ -218,7 +273,12 @@ async function resolveMentions(
   return { entityLinks, entityCreationCandidates, resolvedEntities };
 }
 
-/** Parses + validates a raw model response; null on invalid JSON or shape. */
+/** Parses + validates a raw model response; null on invalid JSON or shape.
+ *
+ * @param raw - Value supplied for `raw`.
+ * @returns The result produced by `parseLlmOutput`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function parseLlmOutput(raw: string): ClassifierLlmOutput | null {
   let json: unknown;
   try {
@@ -235,6 +295,12 @@ function parseLlmOutput(raw: string): ClassifierLlmOutput | null {
  * code-derived axes: resolved entity links / creation candidates, the audience
  * heuristic, the conservative directive downgrade, and the source authority
  * mapped from the event trust class.
+ *
+ * @param output - Value supplied for `output`.
+ * @param input - Value supplied for `input`.
+ * @param resolveEntityFn - Value supplied for `resolveEntityFn`.
+ * @returns The result produced by `assembleClassification`.
+ * @throws Errors raised by validation or dependent operations.
  */
 async function assembleClassification(
   output: ClassifierLlmOutput,
@@ -263,11 +329,25 @@ async function assembleClassification(
   };
 }
 
+/**
+ * Creates classifier.
+ *
+ * @param deps - Value supplied for `deps`.
+ * @returns The result produced by `createClassifier`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 export function createClassifier(deps: ClassifierDeps): Classifier {
   const { generate, resolveEntityFn } = deps;
   const config = classifierConfigSchema.parse(deps.config);
 
   return {
+    /**
+     * Executes classify candidate.
+     *
+     * @param rawInput - Value supplied for `rawInput`.
+     * @returns The result produced by `classifyCandidate`.
+     * @throws Errors raised by validation or dependent operations.
+     */
     async classifyCandidate(rawInput: ClassifyCandidateInput): Promise<ClassificationResult> {
       const input = classifyCandidateInputSchema.parse(rawInput);
       const prompt = buildClassifierPrompt(input.candidate, input.registryAliasHints ?? []);

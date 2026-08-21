@@ -1,3 +1,13 @@
+/**
+ * Composes ordered, budget-aware memory packets from governed inputs.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import type {
   ComposeMemoryPacketData,
   MemoryPacket,
@@ -20,7 +30,7 @@ export type {
 } from "@entellix/contracts/packet";
 
 /**
- * Pure memory-packet composer (S3.1.3). Renders the caller's in-effect
+ * Pure memory-packet composer. Renders the caller's in-effect
  * directives, profile, relevant memories, and procedures into a single packet
  * in the FIXED section order, dropping lower sections first to fit a token
  * budget. The directive block is rendered verbatim (via renderDirectiveBlock)
@@ -41,6 +51,10 @@ const CHARS_PER_TOKEN = 4;
 /**
  * Default char-based token estimator: `ceil(length / 4)`. Monotonic in text
  * length and 0 for the empty string. Used when the caller injects no estimator.
+ *
+ * @param text - Value supplied for `text`.
+ * @returns The result produced by `defaultEstimateTokens`.
+ * @throws Errors raised by validation or dependent operations.
  */
 export const defaultEstimateTokens: TokenEstimator = (text) =>
   Math.ceil(text.length / CHARS_PER_TOKEN);
@@ -86,10 +100,25 @@ interface SectionCounts {
   proc: number;
 }
 
+/**
+ * Executes render profile.
+ *
+ * @param header - Value supplied for `header`.
+ * @param lines - Value supplied for `lines`.
+ * @returns The result produced by `renderProfile`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function renderProfile(header: string, lines: readonly ProfileLineInput[]): string {
   return [header, ...lines.map((line) => `- ${line.text}`)].join("\n");
 }
 
+/**
+ * Executes group memories.
+ *
+ * @param memories - Value supplied for `memories`.
+ * @returns The result produced by `groupMemories`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function groupMemories(memories: readonly RetrievedMemoryInput[]): PacketMemoryGroup[] {
   const order: string[] = [];
   const byLabel = new Map<string, PacketMemoryGroup>();
@@ -110,6 +139,13 @@ function groupMemories(memories: readonly RetrievedMemoryInput[]): PacketMemoryG
   return order.map((label) => byLabel.get(label)!);
 }
 
+/**
+ * Executes render memories.
+ *
+ * @param groups - Value supplied for `groups`.
+ * @returns The result produced by `renderMemories`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function renderMemories(groups: readonly PacketMemoryGroup[]): string {
   const parts: string[] = [PACKET_HEADERS.memories];
   for (const group of groups) {
@@ -121,10 +157,24 @@ function renderMemories(groups: readonly PacketMemoryGroup[]): string {
   return parts.join("\n");
 }
 
+/**
+ * Executes render procedures.
+ *
+ * @param procedures - Value supplied for `procedures`.
+ * @returns The result produced by `renderProcedures`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function renderProcedures(procedures: readonly ProcedureInput[]): string {
   return [PACKET_HEADERS.procedures, ...procedures.map((proc) => `- ${proc.text}`)].join("\n");
 }
 
+/**
+ * Executes render pinned.
+ *
+ * @param memories - Value supplied for `memories`.
+ * @returns The result produced by `renderPinned`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function renderPinned(memories: readonly RetrievedMemoryInput[]): string {
   return [
     PACKET_HEADERS.pinned,
@@ -138,6 +188,12 @@ function renderPinned(memories: readonly RetrievedMemoryInput[]): string {
  * Largest prefix of the pinned slice whose render fits `subBudget`, dropping
  * from the BOTTOM. The empty prefix (0) always fits, so an over-budget first
  * item still leaves the slice empty rather than throwing.
+ *
+ * @param pinned - Value supplied for `pinned`.
+ * @param subBudget - Value supplied for `subBudget`.
+ * @param estimate - Value supplied for `estimate`.
+ * @returns The result produced by `pinnedFitCount`.
+ * @throws Errors raised by validation or dependent operations.
  */
 function pinnedFitCount(
   pinned: readonly RetrievedMemoryInput[],
@@ -155,7 +211,13 @@ function pinnedFitCount(
   return best;
 }
 
-/** Slice each section to the prefix `count` demands, top section first. */
+/** Slice each section to the prefix `count` demands, top section first.
+ *
+ * @param prefix - Value supplied for `prefix`.
+ * @param totals - Value supplied for `totals`.
+ * @returns The result produced by `countsForPrefix`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function countsForPrefix(prefix: number, totals: SectionCounts): SectionCounts {
   const user = Math.min(prefix, totals.user);
   let rest = prefix - user;
@@ -167,6 +229,17 @@ function countsForPrefix(prefix: number, totals: SectionCounts): SectionCounts {
   return { user, org, mem, proc };
 }
 
+/**
+ * Executes render packet body.
+ *
+ * @param directivesRendered - Value supplied for `directivesRendered`.
+ * @param pinnedRendered - Value supplied for `pinnedRendered`.
+ * @param input - Value supplied for `input`.
+ * @param queryMemories - Value supplied for `queryMemories`.
+ * @param counts - Value supplied for `counts`.
+ * @returns The result produced by `renderPacketBody`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function renderPacketBody(
   directivesRendered: string,
   pinnedRendered: string,
@@ -193,6 +266,13 @@ function renderPacketBody(
   return blocks.join("\n\n");
 }
 
+/**
+ * Executes reconfirmation prompt.
+ *
+ * @param signal - Value supplied for `signal`.
+ * @returns The result produced by `reconfirmationPrompt`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function reconfirmationPrompt(signal: ReconfirmSignal): string {
   if (signal.kind === "superseded") {
     return `${signal.subject} was marked ${signal.was}; recent notes say ${signal.now} — update?`;
@@ -206,6 +286,10 @@ function reconfirmationPrompt(signal: ReconfirmSignal): string {
  * procedures — dropping items from the BOTTOM up until the rendered packet fits
  * the token budget. Reconfirmation prompts are surfaced in their own field and
  * never mutate the memories.
+ *
+ * @param input - Value supplied for `input`.
+ * @returns The result produced by `composeMemoryPacket`.
+ * @throws Errors raised by validation or dependent operations.
  */
 export function composeMemoryPacket(input: ComposeMemoryPacketInput): MemoryPacket {
   const estimate = input.estimateTokens ?? defaultEstimateTokens;

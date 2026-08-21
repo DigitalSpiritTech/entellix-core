@@ -23,7 +23,7 @@ The manual paths have these additional requirements:
 | Node.js           | 24 or newer                                                              |
 | PostgreSQL server | 16, 17, or 18                                                            |
 | `psql`            | Required for archive migrations; use a client compatible with the server |
-| pnpm              | 11.9.0, source-checkout path only                                        |
+| pnpm              | 11.22.0, source-checkout path only                                       |
 | GitHub CLI        | Archive path only; required to download and verify the attestation       |
 
 The PostgreSQL range is exercised by the repository clean-room CI matrix. The

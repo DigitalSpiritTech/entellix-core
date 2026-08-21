@@ -1,3 +1,13 @@
+/**
+ * Applies deterministic canonicalization, row-policy, and operation-selection rules.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import {
   type DerivedRowPolicies,
   type MemoryType,
@@ -9,12 +19,12 @@ import {
 
 export type { DerivedRowPolicies, OperationSelection } from "@entellix/contracts/reconciler";
 /**
- * Provider-neutral reconciliation rules (S2.2.4). A host adapter applies these
+ * Provider-neutral reconciliation rules. A host adapter applies these
  * decisions transactionally to its canonical memory repository.
  *
  * NO DELETE PATH: this module deliberately exports no delete-named member.
  * EXPIRE ends a row's life via status='expired'; SUPERSEDE closes valid_to and
- * chains superseded_by — rows are never removed (Core invariant 4). The unit
+ * chains superseded_by, so rows are never removed. The unit
  * spec asserts the exported surface has no delete member; the integration spec
  * asserts row counts never decrease through any operation.
  */
@@ -48,10 +58,25 @@ export interface ReconcilerError extends Error {
   readonly kind: ReconcilerErrorKind;
 }
 
+/**
+ * Creates reconciler error.
+ *
+ * @param kind - Value supplied for `kind`.
+ * @param message - Value supplied for `message`.
+ * @returns The result produced by `createReconcilerError`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 export function createReconcilerError(kind: ReconcilerErrorKind, message: string): ReconcilerError {
   return Object.assign(new Error(message), { kind } as const);
 }
 
+/**
+ * Determines whether reconciler error.
+ *
+ * @param value - Value supplied for `value`.
+ * @returns The result produced by `isReconcilerError`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 export function isReconcilerError(value: unknown): value is ReconcilerError {
   return (
     value instanceof Error &&
@@ -60,11 +85,16 @@ export function isReconcilerError(value: unknown): value is ReconcilerError {
 }
 
 /**
- * Verbatim carve-out guard (Decision 10, PRD §9). For directive/policy content
+ * Verbatim-content guard. For directive and policy content
  * the stored bytes MUST equal the source bytes — no canonicalization,
- * summarization, or merge may touch them. This guard is LIVE (not a stub): it
- * throws the moment stored content drifts from the original, so the byte-equality
- * property test has something real to exercise even before reconcile() lands.
+ * summarization, or merge may touch them. This guard runs on every write and
+ * throws the moment stored content drifts from the original, protecting the
+ * transactional commit boundary and its byte-equality property tests.
+ *
+ * @param original - Value supplied for `original`.
+ * @param stored - Value supplied for `stored`.
+ * @returns Nothing.
+ * @throws A ReconcilerError when stored directive or policy content differs from its source.
  */
 export function assertDirectiveByteEquality(original: string, stored: string): void {
   if (original !== stored) {
@@ -88,9 +118,13 @@ export function assertDirectiveByteEquality(original: string, stored: string): v
  *   3. truncated to MAX_CANONICAL_CONTENT_LENGTH at the last sentence boundary
  *      (. ! ?) at or before the cap, falling back to a word boundary, so the
  *      stored text never ends mid-sentence with trailing punctuation-only noise.
+ *
+ * @param input - Value supplied for `input`.
+ * @returns The result produced by `canonicalizeContent`.
+ * @throws Errors raised by validation or dependent operations.
  */
 export function canonicalizeContent(input: { text: string; memoryType: MemoryType }): string {
-  // Verbatim carve-out (Decision 10): directive/policy content is returned
+  // Verbatim rule: directive and policy content is returned
   // byte-for-byte, so the byte-equality property test holds through commit.
   if (TYPE_DERIVED_POLICIES[input.memoryType].contentVerbatim) return input.text;
 
@@ -116,8 +150,13 @@ export function canonicalizeContent(input: { text: string; memoryType: MemoryTyp
 
 /**
  * Derive render_policy / content_verbatim / expires_at from the memory type at
- * commit (Decision 17). PURE — reads TYPE_DERIVED_POLICIES and resolves
+ * commit. Reads TYPE_DERIVED_POLICIES and resolves
  * `defaultTtlDays` against the injected `now`.
+ *
+ * @param memoryType - Value supplied for `memoryType`.
+ * @param now - Value supplied for `now`.
+ * @returns The result produced by `deriveRowPolicies`.
+ * @throws Errors raised by validation or dependent operations.
  */
 export function deriveRowPolicies(memoryType: MemoryType, now: Date): DerivedRowPolicies {
   const policy = TYPE_DERIVED_POLICIES[memoryType];
@@ -140,6 +179,10 @@ export function deriveRowPolicies(memoryType: MemoryType, now: Date): DerivedRow
  *   - confident `supersedes` → SUPERSEDE(target).
  *   - `duplicates` with materiallyDifferent → MERGE(target); else NOOP(target).
  *   - otherwise → the upstream operation guess, or ADD when there is none.
+ *
+ * @param input - Value supplied for `input`.
+ * @returns The result produced by `selectOperation`.
+ * @throws Errors raised by validation or dependent operations.
  */
 export function selectOperation(input: {
   dispositionOperationGuess?: ReconcileOperation;
@@ -148,7 +191,7 @@ export function selectOperation(input: {
   const { dispositionOperationGuess, conflictAnnotations } = input;
 
   // Contradictions never auto-commit — reaching the reconciler is a guard
-  // violation (they route to review upstream, S2.2.3).
+  // violation because conflicting candidates route to review upstream.
   if (conflictAnnotations.some((annotation) => annotation.relation === "contradicts")) {
     throw createReconcilerError(
       "contradiction_not_auto_committable",

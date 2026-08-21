@@ -1,10 +1,19 @@
+/**
+ * Tests fusion behavior.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import type { MemoryStatus, MemoryType, RenderPolicy } from "@entellix/contracts";
 import { describe, expect, it, vi } from "vitest";
 
 import { RETRIEVAL_CONFIG_V1 } from "../config.ts";
-// RED (S3.1.2): the pure fusion pipeline does not exist yet. These specs pin the
-// Postgres-free contract the developer must land in
-// `@entellix/core/retrieval/fusion`: RRF fusion (k from config), the
+// Verifies the Postgres-free contract in `@entellix/core/retrieval/fusion`: RRF
+// fusion (k from config), the
 // POST-fusion / PRE-boost hard filters (ACL — never a score input — plus
 // temporal validity and status), the boost stage (scope/entity/pin/per-type
 // recency decay), and the OFF-by-default rerank hook. Everything is a pure
@@ -58,15 +67,37 @@ import {
 const NOW = new Date("2026-07-07T00:00:00.000Z");
 const DAY = 24 * 60 * 60 * 1000;
 
+/**
+ * Executes days ago.
+ *
+ * @param days - Value supplied for `days`.
+ * @returns The result produced by `daysAgo`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function daysAgo(days: number): Date {
   return new Date(NOW.getTime() - days * DAY);
 }
 
+/**
+ * Executes days ahead.
+ *
+ * @param days - Value supplied for `days`.
+ * @returns The result produced by `daysAhead`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function daysAhead(days: number): Date {
   return new Date(NOW.getTime() + days * DAY);
 }
 
 // Active, currently-valid, unboosted memory. Override per test.
+/**
+ * Executes mem.
+ *
+ * @param id - Value supplied for `id`.
+ * @param overrides - Value supplied for `overrides`.
+ * @returns The result produced by `mem`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function mem(id: string, overrides: Partial<FusionMemory> = {}): FusionMemory {
   return {
     id,
@@ -83,12 +114,40 @@ function mem(id: string, overrides: Partial<FusionMemory> = {}): FusionMemory {
   };
 }
 
+/**
+ * Executes allow.
+ *
+ * Inputs: None.
+ * @returns The result produced by `allow`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 const allow: MemoryAcl = () => true;
+/**
+ * Executes deny b.
+ *
+ * @param id - Value supplied for `id`.
+ * @returns The result produced by `denyB`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 const denyB: MemoryAcl = (id) => id !== "b";
+/**
+ * Executes ids.
+ *
+ * @param candidates - Value supplied for `candidates`.
+ * @returns The result produced by `ids`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 const ids = (candidates: readonly FusedCandidate[]): string[] => candidates.map((c) => c.id);
 
 // Deterministic PRNG (mulberry32) so adversarial ACL fixtures are reproducible
 // and contain no wall-clock / Math.random nondeterminism.
+/**
+ * Executes mulberry32.
+ *
+ * @param seed - Value supplied for `seed`.
+ * @returns The result produced by `mulberry32`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function mulberry32(seed: number): () => number {
   let state = seed >>> 0;
   return () => {
@@ -306,6 +365,13 @@ describe("ACL is a hard filter, never a score input (adversarial property test)"
         ...allowedIds.map((id) => mem(id)),
       ];
 
+      /**
+       * Executes acl.
+       *
+       * @param id - Value supplied for `id`.
+       * @returns The result produced by `acl`.
+       * @throws Errors raised by validation or dependent operations.
+       */
       const acl: MemoryAcl = (id) => id !== forbiddenId;
 
       const out = fuseAndRank({
@@ -338,6 +404,13 @@ describe("ACL is a hard filter, never a score input (adversarial property test)"
         ranked.toReversed().map((id, i) => ({ id, rank: i + 1 })),
       ];
       const memories = universe.map((id) => mem(id, { updatedAt: NOW }));
+      /**
+       * Executes acl.
+       *
+       * @param id - Value supplied for `id`.
+       * @returns The result produced by `acl`.
+       * @throws Errors raised by validation or dependent operations.
+       */
       const acl: MemoryAcl = (id) => !forbidden.has(id);
 
       const out = fuseAndRank({
@@ -492,7 +565,7 @@ describe("boosts apply AFTER filters and can only reorder survivors", () => {
   });
 });
 
-describe("maybeRerank (hook stubbed OFF by default)", () => {
+describe("maybeRerank (optional hook disabled by default)", () => {
   const candidates: FusedCandidate[] = [
     { id: "a", score: 0.9 },
     { id: "b", score: 0.8 },
@@ -564,9 +637,9 @@ describe("fuseAndRank (full pure pipeline)", () => {
   });
 });
 
-// RED (S4.2.1 relevance-gated retrieval): a new POST-fusion / PRE-boost pure
-// filter that drops candidates whose fused score is strictly below the config
-// floor, so off-topic noise is never surfaced even when the limit is under-filled.
+// Post-fusion, pre-boost relevance filtering drops candidates whose fused score
+// is strictly below the config floor, so off-topic noise is never surfaced even
+// when the limit is under-filled.
 describe("applyRelevanceFloor (drops below-floor candidates, POST-fusion PRE-boost)", () => {
   it("drops candidates scoring strictly below the floor and keeps the rest", () => {
     const out = applyRelevanceFloor({
@@ -705,9 +778,9 @@ describe("fuseAndRank applies the relevance floor (POST-fusion, PRE-boost)", () 
   });
 });
 
-// RED (semantic-distance relevance gate): the shipped RRF-rank floor can't
-// discriminate on a small corpus — the vector lane returns every memory as a
-// nearest neighbour, so every candidate clears the fused-score floor and nothing
+// Semantic-distance relevance gate: an RRF-rank floor cannot discriminate on a
+// small corpus because the vector lane returns every memory as a nearest
+// neighbour, so every candidate clears the fused-score floor and nothing
 // is trimmed. This gate instead bounds the actual semantic cosine DISTANCE from
 // the vector lane, while keeping exact lexical/entity matches (whose lanes are
 // already precise). It is a pure POST-fusion FILTER: never mutates scores, keeps

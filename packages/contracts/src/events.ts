@@ -1,7 +1,17 @@
+/**
+ * Defines append-only intake events and session-batch association contracts.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import { z } from "zod";
 
 /**
- * Event intake contracts (S1.2.1). The `log_context` path is recall-adjacent
+ * Event intake contracts. The `log_context` path is recall-adjacent
  * capture: a client hands the Brain a raw slice of the current work; extraction
  * runs server-side and asynchronously. NOTHING here writes a memory — the ack
  * copy (`LOG_CONTEXT_ACK_MESSAGE`) is deliberately neutral so clients never

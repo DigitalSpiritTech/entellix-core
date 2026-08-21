@@ -1,3 +1,13 @@
+/**
+ * Resolves and renders in-scope directives according to deterministic precedence.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import {
   SPECIFICITY_RANKS,
   type ActiveDirective,
@@ -16,10 +26,10 @@ export type {
 } from "@entellix/contracts/directive-precedence";
 
 /**
- * Directive precedence engine (S2.3.3). Resolves the caller's ACTIVE, in-scope
+ * Directive precedence engine. Resolves the caller's active, in-scope
  * directives by specificity, annotates overrides, and renders a channel-aware
  * directive block; genuinely unresolvable conflicts render both and log a review
- * item (PRD §9 precedence; Decisions 11, 12).
+ * item.
  *
  * The semantic conflict check is INJECTED (`conflictCheck`) so packet-time
  * conflict detection is deterministic in tests and never requires an LLM:
@@ -51,7 +61,12 @@ export interface ResolveDirectivesInput extends ResolveDirectivesData {
 const ORG_GENERAL_RANK = SPECIFICITY_RANKS.indexOf("org_general");
 const USER_GENERAL_RANK = SPECIFICITY_RANKS.indexOf("user_general");
 
-/** General (no-subject) rules rank by owner scope: user-general last, org-general above it. */
+/** General (no-subject) rules rank by owner scope: user-general last, org-general above it.
+ *
+ * @param directive - Value supplied for `directive`.
+ * @returns The result produced by `generalRank`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function generalRank(directive: PrecedenceDirective): number {
   return directive.ownerScopeType === "user" ? USER_GENERAL_RANK : ORG_GENERAL_RANK;
 }
@@ -60,6 +75,11 @@ function generalRank(directive: PrecedenceDirective): number {
  * Whether an entity-scoped directive's subject entity governs the active
  * context: either the subject is itself active, or it is an ancestor of an
  * active entity (a client rule governs an active project belonging to it).
+ *
+ * @param subjectEntityId - Value supplied for `subjectEntityId`.
+ * @param entityContext - Value supplied for `entityContext`.
+ * @returns The result produced by `subjectGovernsActiveContext`.
+ * @throws Errors raised by validation or dependent operations.
  */
 function subjectGovernsActiveContext(
   subjectEntityId: string,
@@ -83,6 +103,11 @@ function subjectGovernsActiveContext(
  * directive whose subject is NOT in the active context cannot claim its entity
  * tier and falls back to its owner general tier (resolveDirectives filters such
  * out-of-scope entity directives before ranking, so this fallback is defensive).
+ *
+ * @param directive - Value supplied for `directive`.
+ * @param entityContext - Value supplied for `entityContext`.
+ * @returns The result produced by `rankSpecificity`.
+ * @throws Errors raised by validation or dependent operations.
  */
 export function rankSpecificity(
   directive: PrecedenceDirective,
@@ -110,6 +135,12 @@ export function rankSpecificity(
  * null-subject directive whose domain spans the other) AND the injected
  * `conflictCheck` says they semantically oppose. Two directives scoped to
  * DIFFERENT entities never directly conflict here.
+ *
+ * @param a - Value supplied for `a`.
+ * @param b - Value supplied for `b`.
+ * @param conflictCheck - Value supplied for `conflictCheck`.
+ * @returns The result produced by `detectDirectConflict`.
+ * @throws Errors raised by validation or dependent operations.
  */
 export function detectDirectConflict(
   a: PrecedenceDirective,
@@ -132,7 +163,12 @@ interface RankedDirective {
   rank: number;
 }
 
-/** The label for the losing rule inside an override annotation ("the org rule"). */
+/** The label for the losing rule inside an override annotation ("the org rule").
+ *
+ * @param loser - Value supplied for `loser`.
+ * @returns The result produced by `loserScopeLabel`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function loserScopeLabel(loser: PrecedenceDirective): string {
   if (loser.subjectEntityType) {
     return `the ${loser.subjectEntityType} rule`;
@@ -140,7 +176,12 @@ function loserScopeLabel(loser: PrecedenceDirective): string {
   return `the ${loser.ownerScopeType} rule`;
 }
 
-/** The context noun the winning rule governs ("this project"). */
+/** The context noun the winning rule governs ("this project").
+ *
+ * @param winner - Value supplied for `winner`.
+ * @returns The result produced by `winnerContextNoun`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function winnerContextNoun(winner: PrecedenceDirective): string {
   return winner.subjectEntityType ?? winner.ownerScopeType;
 }
@@ -149,6 +190,11 @@ function winnerContextNoun(winner: PrecedenceDirective): string {
  * The override annotation shown when a more specific rule prevails over a
  * broader one, e.g. "Project Acme requires Next.js — overrides the org rule for
  * this project" (pinned by the spec).
+ *
+ * @param winner - Value supplied for `winner`.
+ * @param loser - Value supplied for `loser`.
+ * @returns The result produced by `overrideAnnotation`.
+ * @throws Errors raised by validation or dependent operations.
  */
 function overrideAnnotation(winner: PrecedenceDirective, loser: PrecedenceDirective): string {
   return `${winner.title} — overrides ${loserScopeLabel(loser)} for this ${winnerContextNoun(winner)}`;
@@ -158,6 +204,11 @@ function overrideAnnotation(winner: PrecedenceDirective, loser: PrecedenceDirect
  * Break a same-specificity conflict. Returns the ordered [winner, loser] plus
  * the resolution kind, or null when genuinely unresolvable (same authority AND
  * recency). PURE.
+ *
+ * @param a - Value supplied for `a`.
+ * @param b - Value supplied for `b`.
+ * @returns The result produced by `breakTie`.
+ * @throws Errors raised by validation or dependent operations.
  */
 function breakTie(
   a: PrecedenceDirective,
@@ -198,6 +249,10 @@ function breakTie(
  *      then recency (later validFrom);
  *   5. still tied (or conflictCheck leaves both standing) → BOTH kept, a
  *      conflict note recorded, and a review-log entry emitted.
+ *
+ * @param input - Value supplied for `input`.
+ * @returns The result produced by `resolveDirectives`.
+ * @throws Errors raised by validation or dependent operations.
  */
 export function resolveDirectives(input: ResolveDirectivesInput): Resolution {
   const entityContext = input.entityContext ?? {
@@ -302,8 +357,12 @@ export function resolveDirectives(input: ResolveDirectivesInput): Resolution {
  *     SEPARATE annotation lines (content bytes never mutated);
  *   - `hook_injection`: declarative framing wrapper AROUND the verbatim bytes —
  *     presents each rule as information in effect, never an imperative paraphrase
- *     (Decision 12).
+ *     while preserving the original bytes.
  * Exact strings are pinned by the spec's inline snapshots.
+ *
+ * @param input - Value supplied for `input`.
+ * @returns The result produced by `renderDirectiveBlock`.
+ * @throws Errors raised by validation or dependent operations.
  */
 export function renderDirectiveBlock(input: RenderDirectiveBlockInput): string {
   const { active } = input.resolution;

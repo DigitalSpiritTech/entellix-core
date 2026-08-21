@@ -33,4 +33,7 @@ artifacts.
 The first public packages (`0.1.0`) shipped through npm trusted publishing with
 OIDC-generated provenance. Starting with `0.1.1`, the same release workflow also
 builds, attests, uploads, and verifies the matching standalone archive. Stable
-publishing does not use a long-lived npm token.
+publishing does not use a long-lived npm token. The `0.1.2` public-beta baseline
+proved the complete path from compiled npm entry points through the attested
+standalone first-run flow; see the
+[public-beta closeout record](ai/implementation/public-beta-0.1.2.md).

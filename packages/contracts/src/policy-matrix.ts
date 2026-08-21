@@ -1,3 +1,13 @@
+/**
+ * Defines versioned disposition-matrix configuration and simulation contracts.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import { z } from "zod";
 
 import { sensitivityAssessmentSchema } from "./classification.ts";
@@ -11,9 +21,9 @@ import {
 } from "./memory-v2.ts";
 
 /**
- * Confidence policy-matrix contracts (S2.2.2). Dispositions are decided by a
+ * Confidence policy-matrix contracts. Dispositions are decided by a
  * config-driven matrix of `memory_type × audience × source_authority ×
- * sensitivity` — policy DATA, not constants baked into code (PRD §10). The
+ * sensitivity` — policy data, not constants baked into code. The
  * matrix maps a classification tuple to a disposition with a per-cell confidence
  * threshold; `@entellix/core` evaluates it and ALSO enforces hard rules in code
  * that a matrix cell can never loosen.
@@ -27,7 +37,7 @@ import {
  * hard rules (org-visible directive/policy, about-another-person, ambient rule
  * proposals, non-first-party directives) can force `review`/`reject`, but NO
  * matrix cell — however permissive — can escalate a hard-ruled classification to
- * `auto_commit` (Decisions 10, 18). The matrix tunes UP the strictness, never
+ * `auto_commit`. The matrix only increases strictness; it never
  * down past the hard-rule floor.
  */
 

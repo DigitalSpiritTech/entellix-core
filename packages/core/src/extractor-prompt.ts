@@ -1,7 +1,17 @@
+/**
+ * Provides the versioned model prompt for multi-candidate extraction.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import type { ExtractorEvent } from "./extractor.ts";
 
 /**
- * Extractor prompt — versioned CONFIG, not code (S2.1.3, ADR 0019). The prompt
+ * Extractor prompt — versioned configuration rather than executable logic. The prompt
  * text and the model id are the two tunable knobs of the extractor; keeping the
  * prompt here (behind {@link EXTRACTOR_PROMPT_VERSION}, re-exported from
  * `@entellix/contracts/candidates`) means a prompt change is an auditable config
@@ -35,7 +45,12 @@ Rules:
 Return ONLY a JSON object of the form: {"candidates": [{"candidateText": "...", "provisionalType": "...", "evidenceSpan": "...", "reasonSummary": "..."}]}
 Return no prose outside the JSON.`;
 
-/** Renders the source-text block: every batch event's raw text, in order. */
+/** Renders the source-text block: every batch event's raw text, in order.
+ *
+ * @param events - Value supplied for `events`.
+ * @returns The result produced by `renderSourceText`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function renderSourceText(events: ExtractorEvent[]): string {
   return events.map((event, index) => `[${index + 1}] ${event.rawText ?? ""}`).join("\n");
 }
@@ -43,6 +58,10 @@ function renderSourceText(events: ExtractorEvent[]): string {
 /**
  * Builds the extractor prompt for a batch: the versioned instructions plus every
  * event's raw text. Deterministic — the same batch always yields the same prompt.
+ *
+ * @param events - Value supplied for `events`.
+ * @returns The result produced by `buildExtractorPrompt`.
+ * @throws Errors raised by validation or dependent operations.
  */
 export function buildExtractorPrompt(events: ExtractorEvent[]): string {
   return `${INSTRUCTIONS}\n\nSource text:\n${renderSourceText(events)}`;

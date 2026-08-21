@@ -1,10 +1,35 @@
+/**
+ * Validates environment configuration for the single-workspace standalone host.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import { z } from "zod";
 
 import { STANDALONE_ACTOR_ID, STANDALONE_WORKSPACE_ID } from "./contracts.ts";
 
+/**
+ * Executes integer from env.
+ *
+ * @param fallback - Value supplied for `fallback`.
+ * @param minimum - Value supplied for `minimum`.
+ * @returns The result produced by `integerFromEnv`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 const integerFromEnv = (fallback: number, minimum: number) =>
   z.coerce.number().int().min(minimum).default(fallback);
 
+/**
+ * Executes optional from env.
+ *
+ * @param schema - Value supplied for `schema`.
+ * @returns The result produced by `optionalFromEnv`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 const optionalFromEnv = <Schema extends z.ZodType>(schema: Schema) =>
   z.preprocess((value) => (value === "" ? undefined : value), schema.optional());
 
@@ -29,6 +54,13 @@ export const standaloneConfigSchema = z.object({
 });
 export type StandaloneConfig = z.infer<typeof standaloneConfigSchema>;
 
+/**
+ * Loads standalone config.
+ *
+ * @param env - Value supplied for `env`.
+ * @returns The result produced by `loadStandaloneConfig`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 export function loadStandaloneConfig(env: NodeJS.ProcessEnv | Record<string, string | undefined>) {
   return standaloneConfigSchema.parse(env);
 }

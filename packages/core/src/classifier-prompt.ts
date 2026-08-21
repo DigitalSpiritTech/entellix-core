@@ -1,3 +1,13 @@
+/**
+ * Provides the versioned model prompt for candidate governance classification.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import type { MemoryCandidate } from "@entellix/contracts/candidates";
 import { ENTITY_TYPES } from "@entellix/contracts";
 
@@ -48,7 +58,12 @@ For the candidate below, return a classification with:
 
 Return ONLY a JSON object with exactly those keys. Return no prose outside the JSON.`;
 
-/** Renders the registry alias hints block, or a neutral note when there are none. */
+/** Renders the registry alias hints block, or a neutral note when there are none.
+ *
+ * @param aliasHints - Value supplied for `aliasHints`.
+ * @returns The result produced by `renderAliasHints`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function renderAliasHints(aliasHints: string[]): string {
   if (aliasHints.length === 0) return "Known registry aliases: (none supplied)";
   return `Known registry aliases (prefer these when they fit): ${aliasHints.join(", ")}`;
@@ -58,6 +73,11 @@ function renderAliasHints(aliasHints: string[]): string {
  * Builds the classifier prompt for a candidate: the versioned instructions, the
  * registry alias context, and the candidate's text + verbatim evidence span.
  * Deterministic — the same inputs always yield the same prompt.
+ *
+ * @param candidate - Value supplied for `candidate`.
+ * @param aliasHints - Value supplied for `aliasHints`.
+ * @returns The result produced by `buildClassifierPrompt`.
+ * @throws Errors raised by validation or dependent operations.
  */
 export function buildClassifierPrompt(
   candidate: MemoryCandidate,

@@ -1,3 +1,13 @@
+/**
+ * Provides versioned Entellix instruction templates for supported AI clients.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import {
   INSTRUCTION_MARKER_BEGIN,
   INSTRUCTION_MARKER_END,
@@ -8,19 +18,22 @@ import {
 } from "./schema.ts";
 
 /**
- * S4.1.1 per-client instruction template pack. Pure data: each entry is the
- * body a user (or the S4.1.2 CLI) drops into one client surface so that client
- * recalls Entellix memory before work and logs durable context after. The copy
- * mirrors the live MCP server instructions and uses the real Entellix tool
- * names — get_context to recall, save_memory to capture — so the two surfaces
- * read the same way. The versioned registry keeps clients and hosts aligned.
+ * Per-client instruction template pack. Each entry is the body a user places in
+ * one client surface so that client recalls Entellix memory before work and logs
+ * durable context after. The copy mirrors the live MCP server instructions and
+ * uses the real Entellix tool names — get_context to recall, save_memory to
+ * capture — so the two surfaces read the same way. The versioned registry keeps
+ * clients and hosts aligned.
  */
 
 /**
- * Wrap a managed-block body in the marker constants the S4.1.2 CLI uses to do
- * an idempotent insert-or-update inside a user-owned file (CLAUDE.md /
- * AGENTS.md). Kept as a local helper so both managed-block clients stay
- * marker-consistent by construction.
+ * Wrap a managed-block body in marker constants for idempotent insertion or
+ * replacement inside a user-owned file (CLAUDE.md / AGENTS.md). Kept as a local
+ * helper so both managed-block clients stay marker-consistent by construction.
+ *
+ * @param inner - Value supplied for `inner`.
+ * @returns The result produced by `managedBlock`.
+ * @throws Errors raised by validation or dependent operations.
  */
 function managedBlock(inner: string): string {
   return `${INSTRUCTION_MARKER_BEGIN}\n${inner.trim()}\n${INSTRUCTION_MARKER_END}`;
@@ -125,7 +138,7 @@ export const TEMPLATE_PACK_VERSIONS: Record<"v1", TemplatePackVersion> = {
     version: "v1",
     date: "2026-07-08",
     summary:
-      "Initial S4.1.1 instruction pack: recall-before/log-after/never-decide-scope/session-end-summary copy for claude-code and codex (managed-block) and claude-desktop, cowork, and chatgpt (copy-paste), aligned to the v2.1 MCP server instructions.",
+      "Initial instruction pack: recall-before/log-after/never-decide-scope/session-end-summary copy for claude-code and codex (managed-block) and claude-desktop, cowork, and chatgpt (copy-paste), aligned to the v2.1 MCP server instructions.",
     templates: INSTRUCTION_TEMPLATES_V1,
   },
 };
@@ -133,7 +146,7 @@ export const TEMPLATE_PACK_VERSIONS: Record<"v1", TemplatePackVersion> = {
 /** The pack version served on the live default surface. */
 export const ACTIVE_TEMPLATE_PACK_VERSION = "v1" as const;
 
-/** Active templates — the object that production wiring and the CLI read their templates from. */
+/** Active templates consumed by production wiring and external installation tooling. */
 export const ACTIVE_INSTRUCTION_TEMPLATES =
   TEMPLATE_PACK_VERSIONS[ACTIVE_TEMPLATE_PACK_VERSION].templates;
 
@@ -141,6 +154,10 @@ export const ACTIVE_INSTRUCTION_TEMPLATES =
  * Look up the active template for a client. Throws for any value that is not a
  * known instruction client — the parameter is typed, but this guards untyped
  * boundaries (CLI args, request payloads) that reach the function anyway.
+ *
+ * @param client - Value supplied for `client`.
+ * @returns The result produced by `getInstructionTemplate`.
+ * @throws Errors raised by validation or dependent operations.
  */
 export function getInstructionTemplate(client: InstructionClient): InstructionTemplate {
   const template = ACTIVE_INSTRUCTION_TEMPLATES[client];

@@ -1,10 +1,20 @@
+/**
+ * Defines event salience and session-batch lifecycle contracts.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import { z } from "zod";
 
 /**
- * Pipeline contracts (Sprint 2.1). The salience gate is a cheap triage layer
+ * Pipeline contracts. The salience gate is a cheap triage layer
  * that decides WHEN and HOW URGENTLY an event is processed — never WHETHER it
  * exists. Every event stays reprocessable, so the route vocabulary has no
- * terminal-discard member (Core invariant 1, PRD §10, Decision 15).
+ * terminal-discard member; inputs remain reprocessable.
  *
  * Convention (repo-wide): `const FOO = [...] as const` → `fooSchema = z.enum(FOO)`
  * → `z.infer`. These arrays are the single source of truth consumed by the
@@ -50,7 +60,7 @@ export type HotTriggerCategory = z.infer<typeof hotTriggerCategorySchema>;
 export const SALIENCE_LEXICON_VERSION = "1.0.0";
 
 /**
- * Session-batch lifecycle states (S2.1.2). Defined here so all pipeline
+ * Session-batch lifecycle states. Defined here so all pipeline
  * vocabularies live in one contract file; the batching worker and its DB CHECK
  * constraint consume this array.
  * - `open`       — accepting events.
@@ -64,7 +74,7 @@ export const batchStatusSchema = z.enum(BATCH_STATUSES);
 export type BatchStatus = z.infer<typeof batchStatusSchema>;
 
 /**
- * Why a session batch was closed (S2.1.2). Recorded on the batch for cost/ops
+ * Why a session batch was closed. Recorded on the batch for cost and operations
  * analysis of batch boundaries.
  */
 export const BATCH_CLOSE_REASONS = ["idle_timeout", "max_size", "manual"] as const;

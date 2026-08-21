@@ -1,3 +1,13 @@
+/**
+ * Routes intake events by urgency using a versioned lexical salience gate.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import {
   type HotTriggerHit,
   type LexiconCategory,
@@ -16,17 +26,17 @@ export type {
 } from "@entellix/contracts/pipeline";
 
 /**
- * Salience gate (S2.1.1). Cheap triage that decides WHEN/HOW URGENTLY an event
+ * Salience gate. Cheap triage that decides when and how urgently an event
  * is processed, never WHETHER it exists. Pure detection + routing here; the
  * a host adapter persists the decision without mutating the source event.
  *
- * The lexicon and type surface are the versioned interface (Decision 15). Extend
+ * The lexicon and type surface are the versioned interface. Extend
  * the trigger lexicon by adding phrases and bumping SALIENCE_LEXICON_VERSION.
  */
 
 /**
  * SALIENCE_TRIGGER_LEXICON — the documented, versioned hot-trigger lexicon
- * (Decision 15; DoD: "documented trigger lexicon, versioned"). Version is
+ * The trigger lexicon is documented and versioned. Version is
  * SALIENCE_LEXICON_VERSION. `detectHotTriggers` matches these phrases
  * case-insensitively on word boundaries. Extend by adding phrases and bumping
  * the lexicon version.
@@ -60,7 +70,12 @@ export const SALIENCE_LEXICON = {
   categories: SALIENCE_TRIGGER_LEXICON,
 } as const;
 
-/** Escapes a lexicon phrase so it can be embedded in a RegExp source safely. */
+/** Escapes a lexicon phrase so it can be embedded in a RegExp source safely.
+ *
+ * @param phrase - Value supplied for `phrase`.
+ * @returns The result produced by `escapeForRegExp`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function escapeForRegExp(phrase: string): string {
   return phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
@@ -80,6 +95,10 @@ interface SpannedHit extends HotTriggerHit {
  * "always"/"never" match that sits entirely inside an "i always"/"i never"
  * preference match is dropped, so "I always run the linter" is a
  * `preference_marker`, not a `directive_marker`.
+ *
+ * @param text - Value supplied for `text`.
+ * @returns The result produced by `detectHotTriggers`.
+ * @throws Errors raised by validation or dependent operations.
  */
 export function detectHotTriggers(text: string): HotTriggerHit[] {
   const haystack = text.toLowerCase();
@@ -119,12 +138,13 @@ const NOVELTY_BATCH_THRESHOLD = 0.5;
  * - no trigger + novel content → `batch`;
  * - no trigger + low novelty, not a duplicate → `hold`.
  * The `reason` names the deciding trigger category or novelty basis.
+ *
+ * @param input - Trigger and novelty signals used to select a route.
+ * @returns The result produced by `decideRoute`.
+ * @throws Errors raised by validation or dependent operations.
  */
-export function decideRoute({
-  triggers,
-  noveltyScore,
-  nearDuplicate,
-}: RouteDecisionInput): RouteDecision {
+export function decideRoute(input: RouteDecisionInput): RouteDecision {
+  const { triggers, noveltyScore, nearDuplicate } = input;
   routeDecisionInputSchema.parse({ triggers, noveltyScore, nearDuplicate });
   const [lead] = triggers;
   if (lead) {

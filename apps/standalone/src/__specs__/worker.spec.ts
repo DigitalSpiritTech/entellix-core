@@ -1,3 +1,13 @@
+/**
+ * Tests worker behavior.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import { describe, expect, it } from "vitest";
 
 import { createStandaloneWorker } from "../worker.ts";
@@ -18,6 +28,13 @@ describe("standalone automatic worker", () => {
       workspaceId,
       repository,
       extractor: {
+        /**
+         * Executes extract from batch.
+         *
+         * Inputs: None.
+         * @returns The result produced by `extractFromBatch`.
+         * @throws Errors raised by validation or dependent operations.
+         */
         extractFromBatch: async () => ({
           candidates: [
             {
@@ -35,26 +52,45 @@ describe("standalone automatic worker", () => {
         }),
       },
       classifier: {
-        classifyCandidate: async ({ candidate }) => ({
-          candidate,
-          classification: {
-            memoryType: "preference",
-            owner: { value: "user", confidence: 0.99 },
-            scopeDistribution: [{ owner: "user", confidence: 0.99 }],
-            entityLinks: [],
-            entityCreationCandidates: [],
-            audienceSuggestion: { kind: "private_to_owner", basis: "first-person preference" },
-            sensitivity: { level: "normal", aboutAnotherPerson: false },
-            sourceAuthority: "explicit",
-            operationGuess: "ADD",
-            confidence: 0.99,
-          },
-          model: "test",
-          classifierVersion: "classifier/test",
-          retried: false,
-        }),
+        /**
+         * Executes classify candidate.
+         *
+         * @param input - Candidate classification input supplied by the worker.
+         * @returns The result produced by `classifyCandidate`.
+         * @throws Errors raised by validation or dependent operations.
+         */
+        classifyCandidate: async (input) => {
+          const { candidate } = input;
+          return {
+            candidate,
+            classification: {
+              memoryType: "preference",
+              owner: { value: "user", confidence: 0.99 },
+              scopeDistribution: [{ owner: "user", confidence: 0.99 }],
+              entityLinks: [],
+              entityCreationCandidates: [],
+              audienceSuggestion: { kind: "private_to_owner", basis: "first-person preference" },
+              sensitivity: { level: "normal", aboutAnotherPerson: false },
+              sourceAuthority: "explicit",
+              operationGuess: "ADD",
+              confidence: 0.99,
+            },
+            model: "test",
+            classifierVersion: "classifier/test",
+            retried: false,
+          };
+        },
       },
-      conflictDetector: { classifyPairs: async () => [] },
+      conflictDetector: {
+        /**
+         * Executes classify pairs.
+         *
+         * Inputs: None.
+         * @returns The result produced by `classifyPairs`.
+         * @throws Errors raised by validation or dependent operations.
+         */
+        classifyPairs: async () => [],
+      },
       matrix: {
         version: "standalone-test-active",
         cells: [
@@ -69,6 +105,13 @@ describe("standalone automatic worker", () => {
         ],
         defaults: { disposition: "review", minConfidence: 0.5 },
       },
+      /**
+       * Executes now.
+       *
+       * Inputs: None.
+       * @returns The result produced by `now`.
+       * @throws Errors raised by validation or dependent operations.
+       */
       now: () => new Date("2026-08-16T12:00:00.000Z"),
     });
 

@@ -1,3 +1,13 @@
+/**
+ * Composes validated configuration, providers, storage, services, and workers.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import { EXTRACTOR_PROMPT_VERSION } from "@entellix/contracts/candidates";
 import { CLASSIFIER_PROMPT_VERSION } from "@entellix/contracts/classification";
 import { CONFLICT_PROMPT_VERSION } from "@entellix/contracts/conflicts";
@@ -51,7 +61,21 @@ const classifier = createClassifier({
     model: standaloneConfig.ENTELLIX_GENERATION_MODEL,
     promptVersion: CLASSIFIER_PROMPT_VERSION,
   },
+  /**
+   * Resolves entity fn.
+   *
+   * Inputs: None.
+   * @returns The result produced by `resolveEntityFn`.
+   * @throws Errors raised by validation or dependent operations.
+   */
   resolveEntityFn: async () => ({ kind: "none" }),
+  /**
+   * Lists memberships fn.
+   *
+   * Inputs: None.
+   * @returns The result produced by `listMembershipsFn`.
+   * @throws Errors raised by validation or dependent operations.
+   */
   listMembershipsFn: async () => [],
 });
 const conflictDetector = createConflictDetector({
@@ -85,9 +109,23 @@ export const standaloneWorkerLoop = startWorkerLoop({
   batchSize: standaloneConfig.ENTELLIX_WORKER_BATCH_SIZE,
   runOnce: standaloneWorker.runOnce,
   runRetention: standaloneService.runRetention,
+  /**
+   * Executes on error.
+   *
+   * @param error - Value supplied for `error`.
+   * @returns The result produced by `onError`.
+   * @throws Errors raised by validation or dependent operations.
+   */
   onError: (error) => console.error("[standalone-worker] pass failed", error),
 });
 
+/**
+ * Executes stop.
+ *
+ * Inputs: None.
+ * @returns The result produced by `stop`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 const stop = () => {
   standaloneWorkerLoop.stop();
   void standaloneRepository.close();

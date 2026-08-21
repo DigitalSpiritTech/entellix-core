@@ -1,3 +1,13 @@
+/**
+ * Discovers and applies versioned standalone PostgreSQL migrations.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 /* oxlint-disable no-await-in-loop */
 import { readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
@@ -10,6 +20,13 @@ const migrationOptionsSchema = z.object({
   migrationsDirectory: z.string().min(1).default(join(process.cwd(), "migrations")),
 });
 
+/**
+ * Executes migrate standalone database.
+ *
+ * @param rawOptions - Value supplied for `rawOptions`.
+ * @returns The result produced by `migrateStandaloneDatabase`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 export async function migrateStandaloneDatabase(
   rawOptions: z.input<typeof migrationOptionsSchema>,
 ): Promise<void> {

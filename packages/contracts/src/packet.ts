@@ -1,3 +1,13 @@
+/**
+ * Defines composed memory packets and server-verified context envelopes.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import { z } from "zod";
 
 import { resolutionSchema } from "./directive-precedence.ts";
@@ -5,7 +15,7 @@ import { orgMembershipRoleSchema, orgMembershipStatusSchema } from "./memory-v2.
 import { memoryTypeSchema } from "./memory-v2.ts";
 
 /**
- * Memory-packet contracts (S3.1.3). A `get_context` call returns a composed
+ * Memory-packet contracts. A `get_context` call returns a composed
  * PACKET (not a bare memory list): a fixed-order rendering of the caller's
  * in-effect directives, profile, relevant memories, and procedures, plus a
  * server-verified context envelope. This module is pure contract — constants,
@@ -21,8 +31,8 @@ import { memoryTypeSchema } from "./memory-v2.ts";
 /**
  * The packet sections in their FIXED render order. Truncation removes from the
  * BOTTOM (procedures → memories → org_profile → user_profile); `directives` is
- * the top section and is never removed. `pinned` (an always-on governance slice,
- * S4.2.2) renders right after `directives` and, like the directive block, is
+ * the top section and is never removed. `pinned`, an always-on governance slice,
+ * renders right after `directives` and, like the directive block, is
  * never truncated away when non-empty — it draws on its OWN sub-budget so a
  * large pinned list cannot starve query recall. `sectionOrder` on a composed
  * packet is always a subsequence of this array (present sections only).
@@ -128,7 +138,7 @@ export type EnvelopeMembership = z.infer<typeof envelopeMembershipSchema>;
  * The composed memory packet returned by `get_context`. Sections render in the
  * fixed PACKET_SECTIONS order; `directives.rendered` is the verbatim directive
  * block and is always the FIRST thing in `rendered`. `pinned` is the always-on
- * governance slice (S4.2.2) — structured alongside `rendered` so a consumer can
+ * governance slice, structured alongside `rendered` so a consumer can
  * read the guaranteed governance memories without re-parsing the string.
  * `memoryIds` lists every source memory id for traceability. `estimatedTokens`
  * equals the token estimate of `rendered`; `truncated` is true when the token

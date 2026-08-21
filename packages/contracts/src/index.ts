@@ -1,3 +1,13 @@
+/**
+ * Defines the public exports for this TypeScript module.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import { z } from "zod";
 
 export * from "./entities.ts";
@@ -67,13 +77,13 @@ export const getContextInputSchema = z.object({
   taskContext: z.string().trim().min(1).max(4000),
   limit: retrievalLimitSchema,
   // Caller-ASSERTED envelope fields. Never trusted as-is: the service resolves
-  // the acting principal's real membership and overrides these (S3.1.3).
+  // the acting principal's real membership and overrides these values.
   assertedOrgId: z.uuid().optional(),
   assertedEntityIds: z.array(z.uuid()).optional(),
 });
 export type GetContextInput = z.input<typeof getContextInputSchema>;
 
-// v2 (S3.1.3): get_context returns a composed memory PACKET plus the
+// get_context returns a composed memory packet plus the
 // server-verified context envelope, not a bare memory list.
 export const getContextOutputSchema = z.object({
   packet: memoryPacketSchema,
@@ -91,7 +101,7 @@ export const retrieveMemoryInputSchema = z
     query: z.string().trim().min(1).max(500).optional(),
     limit: retrievalLimitSchema,
     // When true, retrieval also surfaces superseded/expired history rows that are
-    // otherwise hard-filtered out (S3.1.2). Default false, backward compatible.
+    // otherwise hard-filtered out. Default false for backward compatibility.
     includeHistory: z.boolean().default(false),
   })
   .refine(
@@ -109,10 +119,10 @@ export const retrieveMemoryOutputSchema = z.object({
 export type RetrieveMemoryOutput = z.infer<typeof retrieveMemoryOutputSchema>;
 
 /**
- * v2 `search` intake tool (S1.2.3). A client-facing explicit-lookup surface that
- * delegates to v1-equivalent retrieval. `filters.scope`/`filters.status` are
- * accepted now but only wired through in a later sprint; Phase 1 honors `query`
- * and `limit` (the lexical/semantic retrieval path).
+ * `search` intake tool. A client-facing explicit-lookup surface that
+ * delegates to the lexical/semantic retrieval path. The portable contract
+ * accepts scope and status filters; hosts document which filters their current
+ * repository adapter applies.
  */
 export const searchInputSchema = z.object({
   query: z.string().trim().min(1).max(500),
@@ -160,14 +170,36 @@ export const organizationSchema = z.object({
 });
 export type Organization = z.infer<typeof organizationSchema>;
 
+/**
+ * Executes normalize base url.
+ *
+ * @param baseUrl - Value supplied for `baseUrl`.
+ * @returns The result produced by `normalizeBaseUrl`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function normalizeBaseUrl(baseUrl: string | URL): string {
   return String(baseUrl).replace(/\/+$/, "");
 }
 
+/**
+ * Executes memory app url.
+ *
+ * @param baseUrl - Value supplied for `baseUrl`.
+ * @param memoryId - Value supplied for `memoryId`.
+ * @returns The result produced by `memoryAppUrl`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 export function memoryAppUrl(baseUrl: string | URL, memoryId: string): string {
   return `${normalizeBaseUrl(baseUrl)}/memories/${memoryId}`;
 }
 
+/**
+ * Executes memories list url.
+ *
+ * @param baseUrl - Value supplied for `baseUrl`.
+ * @returns The result produced by `memoriesListUrl`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 export function memoriesListUrl(baseUrl: string | URL): string {
   return `${normalizeBaseUrl(baseUrl)}/memories`;
 }

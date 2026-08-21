@@ -1,3 +1,13 @@
+/**
+ * Runs the standalone dev workflow.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import { spawn } from "node:child_process";
 
 import { loadStandaloneConfig } from "../src/config.ts";
@@ -11,6 +21,13 @@ const child = spawn("pnpm", ["exec", "mastra", "dev"], {
   stdio: "inherit",
 });
 
+/**
+ * Executes stop child.
+ *
+ * @param signal - Value supplied for `signal`.
+ * @returns The result produced by `stopChild`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 const stopChild = (signal: NodeJS.Signals) => {
   if (!child.killed) child.kill(signal);
 };

@@ -1,14 +1,24 @@
+/**
+ * Defines directive precedence inputs, resolutions, and override annotations.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import { z } from "zod";
 
 import { entityTypeSchema } from "./entities.ts";
 import { ownerScopeTypeSchema, sourceAuthoritySchema } from "./memory-v2.ts";
 
 /**
- * Directive precedence contracts (S2.3.3). When a context packet is composed,
+ * Directive precedence contracts. When a context packet is composed,
  * the caller's ACTIVE, in-scope directives are resolved against one another so
  * the most specific rule wins within the entity context it governs, with a
  * visible override annotation, and genuinely unresolvable conflicts are rendered
- * as-is and logged for review (PRD §9 precedence rules; Decisions 11, 12).
+ * as-is and logged for review.
  *
  * This module is pure contract: constants, Zod schemas, and their inferred
  * types. The resolver and renderer live in `@entellix/core`. Convention mirrors

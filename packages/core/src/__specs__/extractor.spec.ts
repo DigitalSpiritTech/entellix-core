@@ -1,3 +1,13 @@
+/**
+ * Tests extractor behavior.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import {
   CANDIDATE_REASON_MAX_LENGTH,
   EXTRACTOR_PROMPT_VERSION,
@@ -16,14 +26,13 @@ import {
 } from "../extractor.ts";
 
 /**
- * Unit surface for S2.1.3 — the multi-candidate extractor. Exercises the
+ * Unit surface for the multi-candidate extractor. Exercises the
  * extractor factory in isolation with a FAKE generate() (the raw LLM call is
  * injected) and hand-built event rows, so these must NOT touch Postgres,
- * Supabase, an HTTP server, or a real model (see ai/testing.md). RED phase:
- * createExtractor throws 'not implemented: S2.1.3' — these assertions define the
- * developer's target.
+ * an HTTP server, or a real model. These assertions pin the implemented
+ * provider-neutral behavior.
  *
- * Pinned shape (developer implements to satisfy these):
+ * Pinned shape:
  *   createExtractor({ generate, config }) -> { extractFromBatch({ batchId, events }) }
  *   - parses generate() output with extractionOutputSchema
  *   - retries generate() exactly once on invalid output, else throws a typed error
@@ -36,7 +45,12 @@ const CONFIG: ExtractorConfig = {
   promptVersion: EXTRACTOR_PROMPT_VERSION,
 };
 
-/** A provider-neutral event for the batch input. */
+/** A provider-neutral event for the batch input.
+ *
+ * @param rawText - Value supplied for `rawText`.
+ * @returns The result produced by `eventRow`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function eventRow(rawText: string): ExtractorEvent {
   return {
     id: "00000000-0000-4000-8000-0000000000e0",
@@ -45,7 +59,12 @@ function eventRow(rawText: string): ExtractorEvent {
   };
 }
 
-/** Serialize a candidate list the way a well-behaved model would return it. */
+/** Serialize a candidate list the way a well-behaved model would return it.
+ *
+ * @param candidates - Value supplied for `candidates`.
+ * @returns The result produced by `modelOutput`.
+ * @throws Errors raised by validation or dependent operations.
+ */
 function modelOutput(candidates: unknown[]): string {
   return JSON.stringify({ candidates });
 }
@@ -97,7 +116,7 @@ describe("createExtractor — directive candidates stay byte-verbatim", () => {
     const input = `Hard rule for the team: ${evidence}.`;
     const generate = vi.fn<ExtractorGenerateFn>(async () =>
       // The model paraphrased candidateText — the extractor must refuse the
-      // paraphrase and normalize to the verbatim evidence span (Decision 10).
+      // paraphrase and normalize to the verbatim evidence span.
       modelOutput([
         {
           candidateText: "Do not deploy on Fridays",

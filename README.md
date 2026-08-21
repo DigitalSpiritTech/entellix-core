@@ -28,7 +28,7 @@ development environment.
 
 ## Development
 
-Entellix Core requires Node.js 24 or newer and pnpm 11.9.0.
+Entellix Core requires Node.js 24 or newer and pnpm 11.22.0.
 
 ```sh
 corepack enable

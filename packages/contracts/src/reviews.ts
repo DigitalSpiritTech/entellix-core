@@ -1,3 +1,13 @@
+/**
+ * Defines review-queue decisions, edits, conflicts, and outcomes.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import { z } from "zod";
 
 import { conflictRelationSchema } from "./conflicts.ts";
@@ -6,12 +16,12 @@ import { dispositionSchema } from "./policy-matrix.ts";
 import { reconcileOperationSchema } from "./reconciler.ts";
 
 /**
- * Review-queue contracts (S2.3.1). The human-in-the-loop surface: candidates the
- * policy matrix routed to `review` (plus the S1.2.2 migration-flagged backlog)
+ * Review-queue contracts. Candidates the policy matrix routes to `review`, plus
+ * any migration-flagged backlog,
  * are shown with evidence, suggested disposition, and conflict targets for a
  * ~10-second decision. Every action writes a `memory_reviews` audit row and, when
  * it commits canonical memory, flows through the reconciler — the review UI never
- * writes `memories` directly (Core invariant 3; PRD §10, Decisions 10–12, 18).
+ * writes `memories` directly.
  *
  * Convention mirrors the rest of contracts: `const FOO = [...] as const` →
  * `fooSchema = z.enum(FOO)` → `z.infer`. Imported via the
@@ -22,7 +32,7 @@ import { reconcileOperationSchema } from "./reconciler.ts";
 const isoDatetimeSchema = z.iso.datetime({ offset: true });
 
 /**
- * The eight reviewer actions (PRD §10 "Actions" line). Grouped by effect:
+ * The eight reviewer actions, grouped by effect:
  * - COMMIT-ish (flow through the reconciler): `approve` (commit as suggested),
  *   `approve_with_edit` (commit with edits — directive edits stay byte-exact),
  *   `rescope` (change owner/audience, then commit), `save_as_user_private` (force
@@ -95,8 +105,8 @@ export type ReviewQueueItem = z.infer<typeof reviewQueueItemSchema>;
 /**
  * Optional overrides a reviewer applies before commit. Only present for actions
  * that edit the candidate (`approve_with_edit`, `rescope`). For a DIRECTIVE the
- * edited `content` is stored byte-exact — the reconciler's verbatim carve-out
- * (Decision 10) applies to the reviewer's text just as it does to captured text.
+ * edited `content` is stored byte-exact — the reconciler's verbatim rule applies
+ * to the reviewer's text just as it does to captured text.
  */
 export const reviewDecisionEditsSchema = z.object({
   content: z.string().min(1).optional(),

@@ -1,14 +1,24 @@
+/**
+ * Defines conflict relations and detector results for candidate reconciliation.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import { z } from "zod";
 
 import { memoryTypeSchema, ownerScopeTypeSchema } from "./memory-v2.ts";
 
 /**
- * Conflict-detection contracts (S2.2.3). Before a classified candidate is
+ * Conflict-detection contracts. Before a classified candidate is
  * committed, it is compared against the caller's existing ACTIVE memories in the
  * same owner + entity neighborhood. Nearest neighbors (vector + FTS, scoped to
  * the same owner_scope with overlapping entity links) are classified pairwise
  * into one of four relations, and those annotations drive a reconciler
- * operation suggestion (PRD §10, Decision 5–7). Conflict annotations are
+ * operation suggestion. Conflict annotations are
  * staging metadata on a candidate — never canonical memory, never written by an
  * external agent (only the service-role pipeline persists them).
  *
@@ -90,12 +100,9 @@ export const conflictAnnotationSchema = z.object({
 export type ConflictAnnotation = z.infer<typeof conflictAnnotationSchema>;
 
 /**
- * Reconciler operations a conflict analysis can SUGGEST. Deliberately a subset
- * of the reconciler's full vocab — conflict detection never emits SPLIT/EXPIRE.
- *
- * TODO(S2.2.4): swap for the reconciler's OPERATIONS vocab once
- * `@entellix/contracts/reconciler` exports it; kept local so conflict detection
- * typechecks independently of the sibling reconciler contract.
+ * Operations a conflict analysis can suggest. This is intentionally a
+ * conflict-specific vocabulary: it excludes write-only SPLIT/EXPIRE/UPDATE and
+ * includes REVIEW, which stops the candidate before reconciliation.
  */
 export const CONFLICT_OPERATIONS = ["ADD", "SUPERSEDE", "MERGE", "NOOP", "REVIEW"] as const;
 export const conflictOperationSchema = z.enum(CONFLICT_OPERATIONS);

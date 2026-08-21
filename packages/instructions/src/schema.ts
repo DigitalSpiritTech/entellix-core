@@ -1,11 +1,21 @@
+/**
+ * Defines validated per-client instruction-template pack contracts.
+ *
+ * Inputs: Imported dependencies and values passed to the module's documented functions.
+ * Outputs: Exported types, values, and behavior provided by the module.
+ * Errors: Functions document validation, dependency, and runtime errors individually.
+ *
+ * @packageDocumentation
+ */
+
 import { z } from "zod";
 
 /**
- * S4.1.1 contract for the per-client instruction template pack. A template is
- * pure data describing how Entellix's recall/log/scope/summary instructions
- * are packaged for one client surface (see ai/platforms/index.md for the
- * per-platform surface facts these targets align to). This module owns the
- * schema only — `templates.ts` (developer-authored) supplies the content.
+ * Defines the per-client instruction template pack contract. A template is pure
+ * data describing how Entellix's recall/log/scope/summary instructions
+ * are packaged for one client surface. The packaged verification checklist
+ * defines when a surface may be called validated. This module owns the schema
+ * only — `templates.ts` supplies the content.
  */
 
 export const INSTRUCTION_CLIENTS = [
@@ -29,10 +39,9 @@ export const instructionFormatSchema = z.enum(INSTRUCTION_FORMATS);
 export type InstructionFormat = z.infer<typeof instructionFormatSchema>;
 
 /**
- * Managed-block markers. The S4.1.2 CLI reuses these verbatim to do an
- * idempotent insert-or-update of the Entellix-owned block inside a
- * user-owned file (CLAUDE.md / AGENTS.md) without disturbing surrounding
- * content.
+ * Managed-block markers reserved for idempotent insertion or updates of the
+ * Entellix-owned block inside a user-owned file (CLAUDE.md / AGENTS.md) without
+ * disturbing surrounding content.
  */
 export const INSTRUCTION_MARKER_BEGIN = "<!-- entellix:begin -->";
 export const INSTRUCTION_MARKER_END = "<!-- entellix:end -->";
