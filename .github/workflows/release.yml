@@ -63,6 +63,8 @@ jobs:
         id: changesets
         uses: changesets/action@v1
         with:
+          # The publish script translates Changesets 3 NDJSON tag events into
+          # the legacy markers consumed by changesets/action v1.
           publish: pnpm release:publish
           version: pnpm release:version
         env:

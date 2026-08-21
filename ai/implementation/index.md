@@ -65,6 +65,10 @@ the Changesets-generated version pull request. Publishing uses npm trusted
 publishing from `DigitalSpiritTech/entellix-core`; no local npm token is needed
 or expected. A successful Changesets publish continues in the same trusted
 workflow to build, attest, upload, and verify the matching standalone archive.
+`scripts/release-publish.mjs` consumes the Changesets 3 structured tag report
+and emits the compatibility markers used by `changesets/action@v1`; this keeps
+GitHub releases and the standalone continuation tied to the packages actually
+tagged by Changesets rather than human-readable CLI output.
 To repair an existing release asset, manually run the public release workflow
 with its exact `@entellix/standalone@<version>` tag; the workflow checks out that
 tag and performs the same artifact and attestation path without publishing npm

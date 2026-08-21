@@ -15,6 +15,8 @@ standalone asset was not produced automatically.
   GitHub OIDC trusted publishing rather than a long-lived npm token.
 - A successful Changesets publication continues in the same workflow to build,
   attest, upload, and verify the version-matched standalone archive.
+- Changesets 3 structured tag events are adapted to the release markers consumed
+  by `changesets/action@v1`; human-readable CLI output is not a release contract.
 - Manual repair accepts an exact existing standalone tag and uses the same build,
   attestation, upload, and verification path without publishing npm packages.
 - Workflow permissions remain empty by default and are granted narrowly per job.
