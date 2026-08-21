@@ -1,5 +1,17 @@
 # @entellix/standalone
 
+## 0.1.3
+
+### Patch Changes
+
+- cd498ae: Add complete TSDoc contracts to TypeScript modules, classes, and functions, enforce them in repository checks, and refresh standalone runtime and repository toolchain dependencies.
+- e149ba9: Close the public-beta readiness plan, correct stale package documentation, and report the standalone package version through MCP runtime metadata.
+- Updated dependencies [cd498ae]
+- Updated dependencies [e149ba9]
+  - @entellix/contracts@0.1.3
+  - @entellix/core@0.1.3
+  - @entellix/instructions@0.1.3
+
 ## 0.1.2
 
 ### Patch Changes
