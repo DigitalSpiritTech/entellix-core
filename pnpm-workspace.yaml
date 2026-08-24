@@ -27,7 +27,7 @@ catalog:
   "@mastra/core": 1.60.0
   "@mastra/mcp": 1.17.0
   "@mastra/pg": 1.21.0
-  "@types/node": ^24.13.3
+  "@types/node": ^26.2.0
   ai: 7.0.69
   effect: 3.22.1
   mastra: 1.25.1
