@@ -38,7 +38,7 @@
   "devDependencies": {
     "@changesets/cli": "3.0.1",
     "oxfmt": "0.64.0",
-    "oxlint": "1.79.0",
+    "oxlint": "1.85.0",
     "turbo": "2.10.11",
     "typescript": "catalog:"
   },
