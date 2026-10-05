@@ -23,15 +23,15 @@ overrides:
   "valibot@<=1.4.1": 1.4.2
 
 catalog:
-  "@ai-sdk/anthropic": 4.0.39
-  "@mastra/core": 1.60.0
+  "@ai-sdk/anthropic": 4.0.71
+  "@mastra/core": 1.74.0
   "@mastra/mcp": 1.17.0
-  "@mastra/pg": 1.21.0
+  "@mastra/pg": 1.29.0
   "@types/node": ^24.13.3
-  ai: 7.0.69
+  ai: 7.0.127
   effect: 3.22.1
-  mastra: 1.25.1
+  mastra: 1.32.1
   postgres: ^3.4.9
   typescript: 6.0.3
   vitest: 4.1.11
-  zod: 4.4.3
+  zod: 4.6.5
